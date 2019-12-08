@@ -1,0 +1,116 @@
+﻿<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  </head>
+  <body>
+    <div class="container">
+          <form name="ReqForm" method="post" action="/postMD5">
+              <p></p>
+              <table class="table table-bordered table-hover">
+                  <tbody>
+                      <tr>
+                          <td class="col-md-6">Hashed MD5</td>
+                          <td class="col-md-6">
+                              <div class="form-group">
+                                  <input id="input" type="text" class="form-control" name="Hashed_MD5" required maxlength="30" onchange="addMonitor()">
+                              </div>
+                          </td>
+                      </tr>
+                  </tbody>
+              </table>
+          </form>
+      </div>
+      <div class="container">
+          <table class="table" id="displayTable">
+              <thead>
+                  <tr>
+                      <th scope="col">Hashed MD5</th>
+                      <th scope="col">Number of Tried Combination</th>
+                      <th scope="col">Progress</th>
+                  </tr>
+              </thead>
+              <tbody></tbody>
+          </table>
+      </div>
+    <script>
+    function addMonitor(){
+      console.log($('input[name=Hashed_MD5]').val());
+      var formData = {
+          'Hashed_MD5'              : $('input[name=Hashed_MD5]').val()
+      };
+        $.ajax({
+          type: 'POST',
+          url: 'http://localhost:9007/getProgess',
+          data: formData,
+          // dataType: 'json',                              // <-- add this
+          // contentType: 'application/json; charset=utf-8' // <-- remove this
+          })
+          .done(function(result) {
+              console.log(JSON.stringify(result));
+              var ListData = '';
+              $.each(result, function(key, value) {
+                console.log(value);
+                ListData += '<tr class=Entries>';
+                ListData += '<td>'+value["Hashed_MD5"]+'</td>';
+                ListData += '<td>'+value["FinCount"]+'</td>';
+                // ListData += '<td>'+"<div style='color:red;size:'"+value["FinCount"]/value["partitionsize"]+"';'><div>"+'</td>';
+                ListData += '</tr>';
+            });
+
+        // We use .html instead of .append here, to make sure we don't add the same
+        // entries when the interval is ran for the n-th time.
+        $('#displayTable').append(ListData);
+        // setInterval(FetchProgress(), 500);
+        })
+        .fail(function(xhr, status, error) {
+            console.log(error);
+            alert(error);
+        })
+        .always(function(data){
+      });
+    }
+    function FetchProgress(){
+      $('.Entries').each(
+        function(index, element){
+          var formData = {
+              'Hashed_MD5'              : $(this)[0].children[0].textContent
+          };
+          $.ajax({
+            type: 'POST',
+            url: 'http://localhost:9007/getProgess',
+            data: formData,
+            // dataType: 'json',                              // <-- add this
+            // contentType: 'application/json; charset=utf-8' // <-- remove this
+            })
+            .done(function(result) {
+                // console.log(JSON.stringify(result));
+                var ListData = '';
+                $.each(result, function(key, value) {
+                  console.log(value);
+                  ListData += '<tr class=Entries>';
+                  ListData += '<td>'+value["Hashed_MD5"]+'</td>';
+                  ListData += '<td>'+value["FinCount"]+'</td>';
+                  // ListData += '<td>'+"<div style='color:red;size:'"+value["FinCount"]/value["partitionsize"]+"';'><div>"+'</td>';
+                  ListData += '</tr>';
+              });
+
+          // We use .html instead of .append here, to make sure we don't add the same
+          // entries when the interval is ran for the n-th time.
+          // console.log($(element));
+          $(element).replaceWith(ListData);
+          })
+          .fail(function(xhr, status, error) {
+              console.log(error);
+          })
+          .always(function(data){
+        });
+      });
+    }
+    setInterval(FetchProgress, 1000);
+    </script>
+  </body>
+</html>

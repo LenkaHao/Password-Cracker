@@ -53,8 +53,19 @@ app.get('/',function(req, res) {
 // GET method to return the status
 // The function queries the table events for the list of places and sends the response back to client
 app.get('/status', function(req, res) {
+  res.sendFile(__dirname+'/client/status.html');
+});
+
+app.get('/submitted', function(req, res) {
+  res.sendFile(__dirname+'/client/submitted.html');
+});
+// GET method to return the status
+// The function queries the table events for the list of places and sends the response back to client
+app.post('/getProgess', function(req, res) {
+  console.log(req.body.Hashed_MD5);
   var que = "SELECT * FROM tbl_jobs WHERE Hashed_MD5 "
-  mydb.get().query("SELECT * FROM tbl_Hashed_MD5 where Hashed_MD5 = ?",[req.body.Hashed_MD5], function (err, result)
+  mydb.get().query("SELECT * FROM tbl_jobs where Hashed_MD5 = ?",[req.body.Hashed_MD5], function (err, result) {
+    console.log(result);
     res.send(result);
   })
 
@@ -67,33 +78,34 @@ app.post('/postMD5', function(req, res) {
     if (err) throw err;
     console.log("1 record for Hashed_MD5 inserted");
   });
+
   //establish tcp connection to master!!!!!!!!!!!!!!!!!!!!
 
   //=====================================================
-  partitionsize = parseInt(req.body.Size_of_Partition, 10)
-  nodecount = parseInt(req.body.Number_of_Node, 10)
-  // send jobs
-
-  for(let i = 0, i < nodecount; i++) {
-    var client = new net.Socket();
-    client.connect(58000, nodelist[i], function() {
-    	console.log('Connected');
-    	client.write('0');
-    });
-
-    client.on('data', function(data) {
-    	console.log('Received: ' + data);
-    	client.destroy(); // kill client after server's response
-    });
-
-    client.on('close', function() {
-    	console.log('Connection closed');
-    });
-    nodeworks[nodelist[i]] = partitionsize;
-  }
+  // partitionsize = parseInt(req.body.Size_of_Partition, 10)
+  // nodecount = parseInt(req.body.Number_of_Node, 10)
+  // // send jobs
+  //
+  // for(let i = 0, i < nodecount; i++) {
+  //   var client = new net.Socket();
+  //   client.connect(58000, nodelist[i], function() {
+  //   	console.log('Connected');
+  //   	client.write('0');
+  //   });
+  //
+  //   client.on('data', function(data) {
+  //   	console.log('Received: ' + data);
+  //   	client.destroy(); // kill client after server's response
+  //   });
+  //
+  //   client.on('close', function() {
+  //   	console.log('Connection closed');
+  //   });
+  //   nodeworks[nodelist[i]] = partitionsize;
+  // }
   ////=====================================================
-  alert("Job Submitted! Check Status on Next Page with Your MD5!!!")
-  res.redirect("/status");
+
+  res.redirect("/submitted");
 });
 
 // middle ware to serve static files
