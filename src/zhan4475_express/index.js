@@ -12,8 +12,8 @@ var session = require('express-session');
 // native js function for hashing messages with the SHA-256 algorithm
 var crypto = require('crypto');
 // include the mysql module
-var mysql = require("mysql");
-var mydb = require("./db.js");
+// var mysql = require("mysql");
+// var mydb = require("./db.js");
 var net = require('net');
 
 var partitionsize = 1000;
@@ -55,29 +55,42 @@ app.get('/',function(req, res) {
 app.get('/status', function(req, res) {
   res.sendFile(__dirname+'/client/status.html');
 });
-
-app.get('/submitted', function(req, res) {
-  res.sendFile(__dirname+'/client/submitted.html');
-});
+//
+// app.get('/submitted', function(req, res) {
+//   res.sendFile(__dirname+'/client/submitted.html');
+// });
 // GET method to return the status
 // The function queries the table events for the list of places and sends the response back to client
 app.post('/getProgess', function(req, res) {
   console.log(req.body.Hashed_MD5);
-  var que = "SELECT * FROM tbl_jobs WHERE Hashed_MD5 "
-  mydb.get().query("SELECT * FROM tbl_jobs where Hashed_MD5 = ?",[req.body.Hashed_MD5], function (err, result) {
-    console.log(result);
-    res.send(result);
-  })
+  var client = new net.Socket();
+  client.connect(1337, 'localhost', function() {
+  	console.log('Connected');
+  	client.write(req.body.Hashed_MD5+"/"+req.body.Number_of_Node+"/"+req.body.Size_of_Partition);
+  });
+
+  client.on('data', function(data) {
+    console.log(data.toString());
+    var formData = {
+        'Password'              : data.toString()
+    };
+    res.send(formData);
+  	client.destroy(); // kill client after server's response
+  });
+
+  client.on('close', function() {
+  	console.log('Connection closed');
+  });
 
 });
 
 // POST method to insert details of a new event to tbl_events table
-app.post('/postMD5', function(req, res) {
-  var que = "INSERT INTO tbl_jobs (Hashed_MD5, FinCount) VALUES (?,?)";
-  mydb.get().query(que, [req.body.Hashed_MD5, 0], function (err, result) {
-    if (err) throw err;
-    console.log("1 record for Hashed_MD5 inserted");
-  });
+// app.post('/postMD5', function(req, res) {
+//   var que = "INSERT INTO tbl_jobs (Hashed_MD5, FinCount) VALUES (?,?)";
+//   mydb.get().query(que, [req.body.Hashed_MD5, 0], function (err, result) {
+//     if (err) throw err;
+//     console.log("1 record for Hashed_MD5 inserted");
+//   });
 
   //establish tcp connection to master!!!!!!!!!!!!!!!!!!!!
 
@@ -105,8 +118,8 @@ app.post('/postMD5', function(req, res) {
   // }
   ////=====================================================
 
-  res.redirect("/submitted");
-});
+//   res.redirect("/submitted");
+// });
 
 // middle ware to serve static files
 app.use('/client', express.static(__dirname + '/client'));

@@ -7,22 +7,55 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
   </head>
   <body>
-    <div class="container">
-          <form name="ReqForm" method="post" action="/postMD5">
-              <p></p>
-              <table class="table table-bordered table-hover">
-                  <tbody>
-                      <tr>
-                          <td class="col-md-6">Hashed MD5</td>
-                          <td class="col-md-6">
-                              <div class="form-group">
-                                  <input id="input" type="text" class="form-control" name="Hashed_MD5" required maxlength="30" onchange="addMonitor()">
-                              </div>
-                          </td>
-                      </tr>
-                  </tbody>
-              </table>
-          </form>
+     <div class="container">
+        <div class="row">
+            <p><br /></p>
+        </div>
+        <div class="row">
+            <div class="col-md-4"></div>
+            <div class="col-md-4">
+                <div class="panel panel-default">
+                    <form name="ReqForm">
+                        <p></p>
+                        <table class="table table-bordered table-hover">
+                            <tbody>
+                                <tr>
+                                    <td class="col-md-6">Hashed MD5</td>
+                                    <td class="col-md-6">
+                                        <div class="form-group">
+                                            <input type="text" class="form-control" name="Hashed_MD5" required maxlength="30">
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="col-md-6">Number of Node</td>
+                                    <td class="col-md-6">
+                                        <div class="form-group">
+                                            <input type="text" class="form-control" name="Number_of_Node" required maxlength="30">
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="col-md-6">Size of Partition</td>
+                                    <td class="col-md-6">
+                                        <div class="form-group">
+                                            <input type="text" class="form-control" name="Size_of_Partition" required maxlength="30">
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="col-md-6"></td>
+                                    <td class="col-md-6">
+                                        <input type="submit" value="Submit">
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </form>
+                </div>
+            </div>
+            <div class="col-md-4"></div>
+        </div>
       </div>
       <div class="container">
           <table class="table" id="displayTable">
@@ -32,85 +65,53 @@
                       <th scope="col">Number of Tried Combination</th>
                       <th scope="col">Progress</th>
                   </tr>
+                  <tr id="Entries">
+                  </tr>
               </thead>
               <tbody></tbody>
           </table>
       </div>
     <script>
-    function addMonitor(){
-      console.log($('input[name=Hashed_MD5]').val());
-      var formData = {
-          'Hashed_MD5'              : $('input[name=Hashed_MD5]').val()
-      };
-        $.ajax({
-          type: 'POST',
-          url: 'http://localhost:9007/getProgess',
-          data: formData,
-          // dataType: 'json',                              // <-- add this
-          // contentType: 'application/json; charset=utf-8' // <-- remove this
+    $(document).ready(function() {
+        // event.preventDefault();
+        // process the form
+        $('form').submit(function(event) {
+          event.preventDefault();
+          console.log($('input[name=Hashed_MD5]').val());
+          var inputMD5 = $('input[name=Hashed_MD5]').val();
+          var formData = {
+              'Hashed_MD5'              : $('input[name=Hashed_MD5]').val(),
+              'Number_of_Node'              : $('input[name=Number_of_Node]').val(),
+              'Size_of_Partition'              : $('input[name=Size_of_Partition]').val()
+          };
+
+          // process the form
+          $.ajax({
+              type        : 'POST', // define the type of HTTP verb we want to use (POST for our form)
+              url         : 'http://localhost:9007/getProgess', // the url where we want to POST
+              data        : formData, // our data object
           })
           .done(function(result) {
-              console.log(JSON.stringify(result));
+              console.log(result);
               var ListData = '';
-              $.each(result, function(key, value) {
-                console.log(value);
-                ListData += '<tr class=Entries>';
-                ListData += '<td>'+value["Hashed_MD5"]+'</td>';
-                ListData += '<td>'+value["FinCount"]+'</td>';
-                // ListData += '<td>'+"<div style='color:red;size:'"+value["FinCount"]/value["partitionsize"]+"';'><div>"+'</td>';
-                ListData += '</tr>';
-            });
-
-        // We use .html instead of .append here, to make sure we don't add the same
-        // entries when the interval is ran for the n-th time.
-        $('#displayTable').append(ListData);
-        // setInterval(FetchProgress(), 500);
-        })
-        .fail(function(xhr, status, error) {
-            console.log(error);
-            alert(error);
-        })
-        .always(function(data){
-      });
-    }
-    function FetchProgress(){
-      $('.Entries').each(
-        function(index, element){
-          var formData = {
-              'Hashed_MD5'              : $(this)[0].children[0].textContent
-          };
-          $.ajax({
-            type: 'POST',
-            url: 'http://localhost:9007/getProgess',
-            data: formData,
-            // dataType: 'json',                              // <-- add this
-            // contentType: 'application/json; charset=utf-8' // <-- remove this
-            })
-            .done(function(result) {
-                // console.log(JSON.stringify(result));
-                var ListData = '';
-                $.each(result, function(key, value) {
-                  console.log(value);
-                  ListData += '<tr class=Entries>';
-                  ListData += '<td>'+value["Hashed_MD5"]+'</td>';
-                  ListData += '<td>'+value["FinCount"]+'</td>';
-                  // ListData += '<td>'+"<div style='color:red;size:'"+value["FinCount"]/value["partitionsize"]+"';'><div>"+'</td>';
-                  ListData += '</tr>';
-              });
+              ListData += '<tr id=Entries>';
+              ListData += '<td>'+inputMD5+'</td>';
+              ListData += '<td>'+result["Password"]+'</td>';
+              ListData += '</tr>';
 
           // We use .html instead of .append here, to make sure we don't add the same
           // entries when the interval is ran for the n-th time.
-          // console.log($(element));
-          $(element).replaceWith(ListData);
+          $('#Entries').replaceWith(ListData);
+          // setInterval(FetchProgress(), 500);
           })
           .fail(function(xhr, status, error) {
               console.log(error);
+              alert(error);
           })
           .always(function(data){
+          });
         });
       });
-    }
-    setInterval(FetchProgress, 1000);
     </script>
   </body>
 </html>
