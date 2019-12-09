@@ -1,22 +1,45 @@
+import java.io.*;
 import java.net.*;
 import java.util.*;
 
 public class Server {
     static final int PORT = 8080;
+    static final int WORKER_PORT = 9000;
     static final double COMBO = Math.pow(52, 5);
     static final int GROUP_SIZE = 1000;
-    static final int WORKER_SIZE = 10;
+    static final int WORKER_SIZE_BOUND = 10;
 
-    public static void main(String[] args) throws Exception{
-        // initiate server socket
-        ServerSocket serverSocket = new ServerSocket(PORT);
+    private ServerSocket serverSocket;
+    private ServerSocket serverSocketForWorker;
+    // for each partition: job done or not
+    public Map<String, Boolean> partitions;
+    // for each worker: thread for its connection
+    public Map<Socket, Thread> threads;
 
-        // book-keeping: start of each group of 1000 combos -> job done or not
-        Map<String, Boolean> groups = new HashMap<>();
-        generateMap(groups);
+    public Server() throws IOException {
+        partitions = new HashMap<>();
+        generateMap(partitions);
+        serverSocket = new ServerSocket(PORT);
+        serverSocketForWorker = new ServerSocket(WORKER_PORT);
     }
 
-    public static void generateMap(Map<String, Boolean> groups) {
+    public static void main(String[] args) throws Exception{
+        Server server = new Server();
+
+        while (true) {
+            // create thread for web server
+            Socket socket = server.serverSocket.accept();
+            new ServerThread(socket).start();
+
+            // create a new thread for every client
+            Socket workerSocket = server.serverSocketForWorker.accept();
+            ServerThreadForWorker thread = new ServerThreadForWorker(workerSocket);
+            // put socket and thread into mapping
+            server.threads.put(workerSocket, thread);
+        }
+    }
+
+    private void generateMap(Map<String, Boolean> groups) {
         // generate mapping for calculation
         Map<Integer, Character> mapping = new HashMap<>();
         for (int i = 0; i < 26; i++) {
@@ -48,14 +71,11 @@ public class Server {
                 nextStr += mapping.get(next[j]);
             }
             groups.put(nextStr, false);
-            System.out.println(nextStr);
             current = next;
         }
-
-        System.out.println(groups.size());
     }
 
-    public static int[] nextCombo(int[] current, List<Integer> interval) {
+    private int[] nextCombo(int[] current, List<Integer> interval) {
         int[] result = new int[5];
         int carry = 0;
         int idx = 4;
@@ -67,7 +87,62 @@ public class Server {
         }
         return result;
     }
+}
+
+
+// Thread to communicate with web server
+class ServerThread extends Thread {
+    private Socket socket;
+    private BufferedReader reader;
+    private DataOutputStream writer;
+
+    public ServerThread(Socket socket) {
+        this.socket = socket;
+
+        // set up I/O
+        try {
+            InputStream input = socket.getInputStream();
+            reader = new BufferedReader(new InputStreamReader(input));
+            writer = new DataOutputStream(socket.getOutputStream());
+        } catch (IOException ex) {
+            System.out.println("Server exception: " + ex.getMessage());
+            ex.printStackTrace();
+        }
+    }
 
 
 
+}
+
+// Thread to communicate with workers
+class ServerThreadForWorker extends Thread {
+    private Socket socket;
+    private BufferedReader reader;
+    private DataOutputStream writer;
+
+    public ServerThreadForWorker(Socket socket) {
+        this.socket = socket;
+
+        // set up I/O
+        try {
+            InputStream input = socket.getInputStream();
+            reader = new BufferedReader(new InputStreamReader(input));
+            writer = new DataOutputStream(socket.getOutputStream());
+        } catch (IOException ex) {
+            System.out.println("Server exception: " + ex.getMessage());
+            ex.printStackTrace();
+        }
+    }
+
+    public void run() {
+        try {
+            // parse input
+            String input = reader.readLine();
+            // TODO: read input from web server
+            String[] params = input.split(" ");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
 }
