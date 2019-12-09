@@ -1,0 +1,54 @@
+h1, p, ul {
+    text-align: center !important;
+}
+
+.menu ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background-color: darkslateblue;
+}
+
+.menu li {
+    float: left;
+}
+
+.menu li a {
+    display: block;
+    color: white;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+}
+
+.menu li a:hover {
+    background-color: #111;
+}
+
+.myTable {
+    font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+    border-collapse: collapse;
+    width: 100%;
+}
+
+.myTable thead, .myTable th {
+    text-align: center !important;
+}
+
+.myTable td, .myTable th {
+    border: 1px solid #ddd;
+    padding: 8px;
+}
+
+.myTable tr:nth-child(even){background-color: #f2f2f2;}
+
+.myTable tr:hover {background-color: #ddd;}
+
+.myTable th {
+    padding-top: 12px;
+    padding-bottom: 12px;
+    text-align: left;
+    background-color: indianred;
+    color: white;
+}

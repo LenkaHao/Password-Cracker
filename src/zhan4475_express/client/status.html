@@ -1,0 +1,151 @@
+﻿<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  </head>
+  <body>
+     <div class="container">
+        <div class="row">
+            <p><br /></p>
+        </div>
+        <div class="row">
+            <div class="col-md-4"></div>
+            <div class="col-md-4">
+                <div class="panel panel-default">
+                    <form name="ReqForm">
+                        <p></p>
+                        <table class="table table-bordered table-hover">
+                            <tbody>
+                                <tr>
+                                    <td class="col-md-6">Hashed MD5</td>
+                                    <td class="col-md-6">
+                                        <div class="form-group">
+                                            <input type="text" class="form-control" name="Hashed_MD5" required maxlength="30">
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="col-md-6">Number of Node</td>
+                                    <td class="col-md-6">
+                                        <div class="form-group">
+                                            <input type="text" class="form-control" name="Number_of_Node" required maxlength="30" onchange="reConfigNumberOfNode()">
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="col-md-6">Size of Partition</td>
+                                    <td class="col-md-6">
+                                        <div class="form-group">
+                                            <input type="text" class="form-control" name="Size_of_Partition" required maxlength="30" onchange="reConfigPartitionSize()">
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="col-md-6"></td>
+                                    <td class="col-md-6">
+                                        <input type="submit" value="Submit">
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </form>
+                </div>
+            </div>
+            <div class="col-md-4"></div>
+        </div>
+      </div>
+      <div class="container">
+          <table class="table" id="displayTable">
+              <thead>
+                  <tr>
+                      <th scope="col">Hashed MD5</th>
+                      <th scope="col">Number of Tried Combination</th>
+                      <th scope="col">Progress</th>
+                  </tr>
+                  <tr id="Entries">
+                  </tr>
+              </thead>
+              <tbody></tbody>
+          </table>
+      </div>
+    <script>
+    $(document).ready(function() {
+        // event.preventDefault();
+        // process the form
+        $('form').submit(function(event) {
+          event.preventDefault();
+          console.log($('input[name=Hashed_MD5]').val());
+          var inputMD5 = $('input[name=Hashed_MD5]').val();
+          var formData = {
+              'Hashed_MD5'              : $('input[name=Hashed_MD5]').val(),
+              'Number_of_Node'              : $('input[name=Number_of_Node]').val(),
+              'Size_of_Partition'              : $('input[name=Size_of_Partition]').val()
+          };
+
+          // process the form
+          $.ajax({
+              type        : 'POST', // define the type of HTTP verb we want to use (POST for our form)
+              url         : 'http://localhost:9007/getProgess', // the url where we want to POST
+              data        : formData, // our data object
+          })
+          .done(function(result) {
+              console.log(result);
+              var ListData = '';
+              ListData += '<tr id=Entries>';
+              ListData += '<td>'+inputMD5+'</td>';
+              ListData += '<td>'+result["Password"]+'</td>';
+              ListData += '</tr>';
+
+          // We use .html instead of .append here, to make sure we don't add the same
+          // entries when the interval is ran for the n-th time.
+          $('#Entries').replaceWith(ListData);
+          // setInterval(FetchProgress(), 500);
+          })
+          .fail(function(xhr, status, error) {
+              console.log(error);
+              alert(error);
+          })
+          .always(function(data){
+          });
+        });
+      });
+      function reConfigNumberOfNode(){
+        var formData = {
+            'Number_of_Node'              : $('input[name=Number_of_Node]').val()
+        };
+        $.ajax({
+            type        : 'POST', // define the type of HTTP verb we want to use (POST for our form)
+            url         : 'http://localhost:9007/reConfigNumberOfNode', // the url where we want to POST
+            data        : formData, // our data object
+        })
+        .always(function(data){
+          console.log(data);
+          if(data["result"]==="t"){
+            window.alert("after submit, user can change 2nd and 3rd cell to change accordingly");
+          }
+          else if(!data["result"]==="OK"){
+            window.alert("");
+          }
+        });
+      }
+      function reConfigPartitionSize(){
+        var formData = {
+            'Size_of_Partition'              : $('input[name=Size_of_Partition]').val()
+        };
+        $.ajax({
+            type        : 'POST', // define the type of HTTP verb we want to use (POST for our form)
+            url         : 'http://localhost:9007/reConfigPartitionSize', // the url where we want to POST
+            data        : formData, // our data object
+        })
+        .always(function(data){
+          if(!data["result"]==="OK"){
+            window.alert();
+          }
+        });
+      }
+    </script>
+  </body>
+</html>

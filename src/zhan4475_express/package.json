@@ -1,0 +1,17 @@
+{
+  "name": "zhan4475_hw06",
+  "version": "1.0.0",
+  "description": "",
+  "main": "Assignment 6",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "zhan4475",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.18.3",
+    "express": "^4.16.4",
+    "express-session": "^1.15.6",
+    "mysql": "^2.16.0"
+  }
+}
