@@ -31,7 +31,7 @@
                                     <td class="col-md-6">Number of Node</td>
                                     <td class="col-md-6">
                                         <div class="form-group">
-                                            <input type="text" class="form-control" name="Number_of_Node" required maxlength="30">
+                                            <input type="text" class="form-control" name="Number_of_Node" required maxlength="30" onchange="reConfigNumberOfNode()">
                                         </div>
                                     </td>
                                 </tr>
@@ -39,7 +39,7 @@
                                     <td class="col-md-6">Size of Partition</td>
                                     <td class="col-md-6">
                                         <div class="form-group">
-                                            <input type="text" class="form-control" name="Size_of_Partition" required maxlength="30">
+                                            <input type="text" class="form-control" name="Size_of_Partition" required maxlength="30" onchange="reConfigPartitionSize()">
                                         </div>
                                     </td>
                                 </tr>
@@ -112,6 +112,36 @@
           });
         });
       });
+      function reConfigNumberOfNode(){
+        var formData = {
+            'Number_of_Node'              : $('input[name=Number_of_Node]').val()
+        };
+        $.ajax({
+            type        : 'POST', // define the type of HTTP verb we want to use (POST for our form)
+            url         : 'http://localhost:9007/reConfigNumberOfNode', // the url where we want to POST
+            data        : formData, // our data object
+        })
+        .always(function(data){
+          if(!data["result"]==="OK"){
+            window.alert();
+          }
+        });
+      }
+      function reConfigPartitionSize(){
+        var formData = {
+            'Size_of_Partition'              : $('input[name=Size_of_Partition]').val()
+        };
+        $.ajax({
+            type        : 'POST', // define the type of HTTP verb we want to use (POST for our form)
+            url         : 'http://localhost:9007/reConfigPartitionSize', // the url where we want to POST
+            data        : formData, // our data object
+        })
+        .always(function(data){
+          if(!data["result"]==="OK"){
+            window.alert();
+          }
+        });
+      }
     </script>
   </body>
 </html>

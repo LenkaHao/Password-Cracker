@@ -55,10 +55,7 @@ app.get('/',function(req, res) {
 app.get('/status', function(req, res) {
   res.sendFile(__dirname+'/client/status.html');
 });
-//
-// app.get('/submitted', function(req, res) {
-//   res.sendFile(__dirname+'/client/submitted.html');
-// });
+
 // GET method to return the status
 // The function queries the table events for the list of places and sends the response back to client
 app.post('/getProgess', function(req, res) {
@@ -66,7 +63,7 @@ app.post('/getProgess', function(req, res) {
   var client = new net.Socket();
   client.connect(1337, 'localhost', function() {
   	console.log('Connected');
-  	client.write(req.body.Hashed_MD5+"/"+req.body.Number_of_Node+"/"+req.body.Size_of_Partition);
+  	client.write("r/"+req.body.Hashed_MD5+"/"+req.body.Number_of_Node+"/"+req.body.Size_of_Partition);
   });
 
   client.on('data', function(data) {
@@ -81,7 +78,64 @@ app.post('/getProgess', function(req, res) {
   client.on('close', function() {
   	console.log('Connection closed');
   });
+});
 
+// GET method to return the status
+// The function queries the table events for the list of places and sends the response back to client
+app.post('/reConfigPartitionSize', function(req, res) {
+  // console.log(req.body.Hashed_MD5);
+  var client = new net.Socket();
+  client.connect(1337, 'localhost', function() {
+  	console.log('Connected');
+  	client.write("p/"+req.body.Size_of_Partition);
+  });
+
+  client.on('data', function(data) {
+    console.log(data.toString());
+    if(data.toString()==="OK") {
+      let formData = {
+          'result'              : data.toString()
+      };
+    } else {
+      let formData = {
+          'result'              : "failed"
+      };
+    }
+    res.send(formData);
+  	client.destroy(); // kill client after server's response
+  });
+
+  client.on('close', function() {
+  	console.log('Connection closed');
+  });
+});
+
+app.post('/reConfigNumberOfNode', function(req, res) {
+  // console.log(req.body.Hashed_MD5);
+  var client = new net.Socket();
+  client.connect(1337, 'localhost', function() {
+  	console.log('Connected');
+  	client.write("n/"+req.body.Number_of_Node);
+  });
+
+  client.on('data', function(data) {
+    console.log(data.toString());
+    if(data.toString()==="OK") {
+      let formData = {
+          'result'              : data.toString()
+      };
+    } else {
+      let formData = {
+          'result'              : "failed"
+      };
+    }
+    res.send(formData);
+  	client.destroy(); // kill client after server's response
+  });
+
+  client.on('close', function() {
+  	console.log('Connection closed');
+  });
 });
 
 // POST method to insert details of a new event to tbl_events table
