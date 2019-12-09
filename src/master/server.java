@@ -145,6 +145,7 @@ public class Server
 
     private static  class JobHandler extends ClientHandler
     {
+        // each job would have WORKER_SIZE_BOUND number of working parts
         private Semaphore available = new Semaphore(WORKER_SIZE_BOUND, true);
         private Semaphore wait = new Semaphore(1, true);
         private final String[] Job;
@@ -168,12 +169,11 @@ public class Server
 
             try
             {
-                // final CountDownLatch latch = new CountDownLatch(WORKER_SIZE_BOUND);
+                // loop head of partition
                 while(!nextHead.equals("-1")) {
-
-                  final int[] value = new int[WORKER_SIZE_BOUND]; // 0: done; -1: not found
                   DataInputStream Win = WorkerList.get(LastUsedHost).GetWdis();
                   DataOutputStream Wout = WorkerList.get(LastUsedHost).GetWdos();
+                  Socket Ws = WorkerList.get(LastUsedHost).GetWs();
 
                   Thread PartHandler = new Thread("UIHandler"){
                       @Override
@@ -197,8 +197,9 @@ public class Server
                       }
                   };
                   PartHandler.start();
+
                   WorkerJobs.put(Ws, WorkerJobs.get(Ws).add(PartHandler));
-                  LastUsedHost = LastUsedHost+1;
+                  LastUsedHost = (LastUsedHost+1)%WORKER_SIZE_BOUND;
                   available.acquire();
                   if(!result.equals("")) {
                     Cdos.writeUTF(result);
@@ -207,13 +208,15 @@ public class Server
                       t.interupt();
                     }
                     break;
+                  } else {
+                    // !!!!!! increment nexthead
                   }
                 }
                 // closing resources
                 this.Cdis.close();
                 this.Cdos.close();
 
-            }catch(IOException e){
+            }catch(Exception e){
                 e.printStackTrace();
                 this.Cdis.close();
                 this.Cdos.close();
