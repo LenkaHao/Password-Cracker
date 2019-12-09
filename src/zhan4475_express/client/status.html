@@ -122,8 +122,12 @@
             data        : formData, // our data object
         })
         .always(function(data){
-          if(!data["result"]==="OK"){
-            window.alert();
+          console.log(data);
+          if(data["result"]==="t"){
+            window.alert("after submit, user can change 2nd and 3rd cell to change accordingly");
+          }
+          else if(!data["result"]==="OK"){
+            window.alert("");
           }
         });
       }
