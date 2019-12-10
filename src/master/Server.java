@@ -1,7 +1,7 @@
 // Java implementation of  Server side
 // It contains two classes : Server and ClientHandler
 // Save file as Server.java
-
+// TODO: let web use sinlge connection always.
 import java.io.*;
 import java.text.*;
 import java.util.*;
