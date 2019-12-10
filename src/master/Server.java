@@ -8,7 +8,7 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.net.*;
 
-class WorkerInfo{
+public class WorkerInfo{
   private final Socket Ws;
   private final DataInputStream Wdis;
   private final DataOutputStream Wdos;
@@ -134,92 +134,6 @@ public class Server
         }
     }
 }
- static class NextParition {
-     // public static void main(String[] args) {
-     //     System.out.println("Hello");
-     //     String result1 = getNextParition("AAAAA", 10);
-     //     System.out.println(result1);
-     // }
-
-     public static String getNextParition(String lastString, int groupSize) {
-         Map<Integer, Character> toChar = new HashMap<>();
-         for (int i = 0; i < 26; i++) {
-             toChar.put(i, (char) (i + 65));
-         }
-         for (int i = 26; i < 52; i++) {
-             toChar.put(i, (char) (i + 71));
-         }
-
-         Map<Character, Integer> toInt = new HashMap<>();
-         for (int idx : toChar.keySet()) {
-             toInt.put(toChar.get(idx), idx);
-         }
-
-         int[] lastIdx = new int[5];
-         for (int i = 0; i < 5; i++) {
-             lastIdx[i] = toInt.get(lastString.charAt(i));
-         }
-
-         List<Integer> interval = getInterval(groupSize);
-         int[] nextIdx = new int[5];
-         int carry = 0;
-         int idx = 4;
-         while (idx >=0 ) {
-             int digit = lastIdx[idx] + interval.get(idx) + carry;
-             nextIdx[idx] = digit % 52;
-             carry = digit / 52;
-             idx -= 1;
-         }
-
-         if (nextIdx[0] >= 52) {
-             return "-1";
-         }
-
-         String nextString = "";
-         for (int i = 0; i < 5; i++) {
-             nextString += toChar.get(nextIdx[i]);
-         }
-
-         return nextString;
-     }
-
-     public static List<Integer> getInterval(int groupSize) {
-         int gap = groupSize;
-         List<Integer> interval = new LinkedList<>();
-         while (gap > 0) {
-             interval.add(0, gap % 52);
-             gap /= 52;
-         }
-         while (interval.size() < 5) {
-             interval.add(0, 0);
-         }
-         return interval;
-     }
- }
-
-
-
-class ClientHandler extends Thread{
-  // DateFormat fordate = new SimpleDateFormat("yyyy/MM/dd");
-  // DateFormat fortime = new SimpleDateFormat("hh:mm:ss");
-  protected final DataInputStream Cdis;
-  protected final DataOutputStream Cdos;
-  protected final Socket Cs;
-  protected int GROUP_SIZE = 1000;
-  // protected int WORKER_SIZE_BOUND = 10;
-  protected int WORKER_SIZE = 0;
-  protected Semaphore available = new Semaphore(WORKER_SIZE, true);
-  protected Semaphore waitReConfig = new Semaphore(1, true);
-  protected ConcurrentLinkedQueue<String> reSubmittedParts = new ConcurrentLinkedQueue<>();
-
-  // Constructor
-  public ClientHandler(Socket Cs, DataInputStream Cdis, DataOutputStream Cdos)
-  {
-      this.Cs = Cs;
-      this.Cdis = Cdis;
-      this.Cdos = Cdos;
-  }
-}
 class JobHandler extends ClientHandler
 {
     // each job would have WORKER_SIZE number of working parts
@@ -343,8 +257,8 @@ class JobHandler extends ClientHandler
                   @Override
                   public void run() {
                     try{
-                      if(this.){
-
+                      if(Thread.currentThread().interrupted()){
+                        throw new InterruptedException("InterruptedException!!!!!");
                       }
                       String line = Job[1]+"/"+nextHead+"/"+GROUP_SIZE+"\n";     // MD5/nextHead/GROUP_SIZE
                       Wout.writeUTF(line);
@@ -401,8 +315,10 @@ class JobHandler extends ClientHandler
                   @Override
                   public void run() {
                     try{
+                      if(Thread.currentThread().interrupted()){
+                        throw new InterruptedException("InterruptedException!!!!!");
+                      }
                       String line = reSubmittedParts.poll();
-
                       Wout.writeUTF(line);
                       line = Win.readLine();
                       if(line.equals("11111")) {
@@ -467,35 +383,86 @@ class JobHandler extends ClientHandler
         }
     }
 }
-// class PartHandler extends ClientHandler
-// {
-//     private final String head;
-//     private final String tail;
-//
-//
-//     // Constructor
-//     public PartHandler(String tail, String head, Socket Cs, DataInputStream Cdis, DataOutputStream Cdos, int workerID)
-//     {
-//         super(Cs, Cdis, Cdos);
-//         this.tail = tail;
-//         this.head = head;
-//         this.workerID = workerID;
-//     }
-//
-//     @Override
-//     public void run()
-//     {
-//         String received;
-//         String toreturn;
-//
-//         try
-//         {
-//             // closing resources
-//             this.Cdis.close();
-//             this.Cdos.close();
-//
-//         }catch(IOException e){
-//             e.printStackTrace();
-//         }
-//     }
-// }
+class ClientHandler extends Thread{
+  // DateFormat fordate = new SimpleDateFormat("yyyy/MM/dd");
+  // DateFormat fortime = new SimpleDateFormat("hh:mm:ss");
+  protected final DataInputStream Cdis;
+  protected final DataOutputStream Cdos;
+  protected final Socket Cs;
+  protected int GROUP_SIZE = 1000;
+  // protected int WORKER_SIZE_BOUND = 10;
+  protected int WORKER_SIZE = 0;
+  protected Semaphore available = new Semaphore(WORKER_SIZE, true);
+  protected Semaphore waitReConfig = new Semaphore(1, true);
+  protected ConcurrentLinkedQueue<String> reSubmittedParts = new ConcurrentLinkedQueue<>();
+
+  // Constructor
+  public ClientHandler(Socket Cs, DataInputStream Cdis, DataOutputStream Cdos)
+  {
+      this.Cs = Cs;
+      this.Cdis = Cdis;
+      this.Cdos = Cdos;
+  }
+}
+class NextParition {
+     // public static void main(String[] args) {
+     //     System.out.println("Hello");
+     //     String result1 = getNextParition("AAAAA", 10);
+     //     System.out.println(result1);
+     // }
+
+     public static String getNextParition(String lastString, int groupSize) {
+         Map<Integer, Character> toChar = new HashMap<>();
+         for (int i = 0; i < 26; i++) {
+             toChar.put(i, (char) (i + 65));
+         }
+         for (int i = 26; i < 52; i++) {
+             toChar.put(i, (char) (i + 71));
+         }
+
+         Map<Character, Integer> toInt = new HashMap<>();
+         for (int idx : toChar.keySet()) {
+             toInt.put(toChar.get(idx), idx);
+         }
+
+         int[] lastIdx = new int[5];
+         for (int i = 0; i < 5; i++) {
+             lastIdx[i] = toInt.get(lastString.charAt(i));
+         }
+
+         List<Integer> interval = getInterval(groupSize);
+         int[] nextIdx = new int[5];
+         int carry = 0;
+         int idx = 4;
+         while (idx >=0 ) {
+             int digit = lastIdx[idx] + interval.get(idx) + carry;
+             nextIdx[idx] = digit % 52;
+             carry = digit / 52;
+             idx -= 1;
+         }
+
+         if (nextIdx[0] >= 52) {
+             return "-1";
+         }
+
+         String nextString = "";
+         for (int i = 0; i < 5; i++) {
+             nextString += toChar.get(nextIdx[i]);
+         }
+
+         return nextString;
+     }
+
+     public static List<Integer> getInterval(int groupSize) {
+         int gap = groupSize;
+         List<Integer> interval = new LinkedList<>();
+         while (gap > 0) {
+             interval.add(0, gap % 52);
+             gap /= 52;
+         }
+         while (interval.size() < 5) {
+             interval.add(0, 0);
+         }
+         return interval;
+     }
+ }

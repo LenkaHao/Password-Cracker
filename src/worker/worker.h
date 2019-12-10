@@ -19,7 +19,7 @@
 #include <thread>
 
 
-#define DEFAULTPORT 58000
+#define DEFAULTPORT 9000
 #define MAXHOSTNAME 255
 #define ENDMSG "\n"
 
