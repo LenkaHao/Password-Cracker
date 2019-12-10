@@ -23,7 +23,7 @@
 #define MAXHOSTNAME 255
 #define ENDMSG "\n"
 
-enum Status{INIT, READY, IDLE, CRACK};
+enum Status{INIT, READY, IDLE, CRACK, TERMINATE};
 
 struct Task {
   std::string pwd_md5;
@@ -33,11 +33,11 @@ struct Task {
 
 class Worker {
 public:
-  Worker() : Worker(DEFAULTPORT) {
-    std::cout << "Worker: undefined port number name, using 58000" << std::endl;
+  Worker() : Worker("localhost", DEFAULTPORT) {
+    std::cout << "Worker: undefined host name, using localhost with port: 58000" << std::endl;
   }
-  Worker(const uint32_t port);
-  int establish();
+  Worker(const char *host, const uint32_t port);
+  int createConnection();
   sockaddr_in getSocketAddress() const { return worker_addr; }
   int getSocketFd() const { return worker_sockfd; }
   void closeSocket() { close(worker_sockfd); }
@@ -47,7 +47,7 @@ public:
 private:
   int worker_sockfd;  // 3: listening socket
   sockaddr_in worker_addr;
-  char hostname[MAXHOSTNAME + 1];
+  const char *hostname;
   Status state;
 };
 
@@ -61,11 +61,25 @@ inline void parseTask(sockaddr_in *socket_addr, std::string &ip, std::string &po
   port = std::to_string(ntohs(socket_addr->sin_port));
 }
 
+// return true if increase lead to a carry
+inline bool nextASCII(char in, char *out) {
+  // ASCII A-Z [65-90], a-z[97,122]
+  if (static_cast<int>(in) == 90) {
+    *out = static_cast<char>(97);
+    return false;
+  } else if (static_cast<int>(in) == 122) {
+    *out = static_cast<char>(65);
+    return true;
+  } else {
+    *out = static_cast<char>(static_cast<int>(in) + 1);
+    return false;
+  }
+}
 
 std::mutex mtx;
-//void echo(int sockfd, uint32_t id, std::map<uint32_t, std::string> *map);
 void crack(int sockfd, Task *task, Worker *worker);
 int sendAll(int sockfd, const std::string &msg, uint32_t size);
 int receiveAll(int sockfd, std::string &msg);
 bool parseTask(const std::string &msg, Task *task);
+std::string nextPermutation(const std::string &pwd);
 #endif //WORKER_WORKER_H
