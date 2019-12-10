@@ -75,7 +75,8 @@ app.get('/', function(req, res) {
 app.post('/getProgess', function(req, res) {
   if (req.session.value) {
     console.log(req.body.Hashed_MD5);
-    var client = new net.Socket();
+    client = new net.Socket();
+    client.setKeepAlive(true, 60000);
     client.connect(8000, 'localhost', function() {
     	console.log('Connected');
     	client.write("r/"+req.body.Hashed_MD5+"/"+req.body.Number_of_Node+"/"+req.body.Size_of_Partition+"\n");
@@ -91,13 +92,13 @@ app.post('/getProgess', function(req, res) {
           'Password'              : data.toString()
       };
       res.send(formData);
-    	client.destroy(); // kill client after server's response
-      console.log("Cs closed");
+    	// client.destroy(); // kill client after server's response
+      // console.log("Cs closed");
     });
 
-    client.on('close', function() {
-    	console.log('Connection closed');
-    });
+    // client.on('close', function() {
+    // 	console.log('Connection closed');
+    // });
   } else {
     console.log("haven't login");
     res.redirect('/');
@@ -111,7 +112,7 @@ app.post('/reConfigPartitionSize', function(req, res) {
   console.log(req.session.value);
   if (req.session.value) {
     // console.log(req.body.Hashed_MD5);
-    var client = UserDB.get(req.session.value).get("Cs");
+    client = UserDB.get(req.session.value).get("Cs");
     if(client){
       // client.connect(1337, 'localhost', function() {
       	// console.log('Connected');
@@ -122,11 +123,11 @@ app.post('/reConfigPartitionSize', function(req, res) {
       client.on('data', function(data) {
         console.log(data.toString());
         if(data.toString()==="OK") {
-          let formData = {
+          var formData = {
               'result'              : data.toString()
           };
         } else {
-          let formData = {
+          var formData = {
               'result'              : "failed"
           };
         }
@@ -134,7 +135,7 @@ app.post('/reConfigPartitionSize', function(req, res) {
       	// client.destroy(); // kill client after server's response
       });
     } else {
-        let formData = {
+        var formData = {
             'result'              : "t"
         };
         res.send(formData);
@@ -154,7 +155,7 @@ app.post('/reConfigNumberOfNode', function(req, res) {
   console.log(req.session.value);
   if (req.session.value) {
     // console.log(req.body.Hashed_MD5);
-    var client = UserDB.get(req.session.value).get("Cs");
+    client = UserDB.get(req.session.value).get("Cs");
     if(client) {
       // client.connect(1337, 'localhost', function() {
       // 	console.log('Connected');
@@ -165,11 +166,11 @@ app.post('/reConfigNumberOfNode', function(req, res) {
       client.on('data', function(data) {
         console.log(data);
         if(data.toString()==="OK") {
-          let formData = {
+          var formData = {
               'result'              : data.toString()
           };
         } else {
-          let formData = {
+          var formData = {
               'result'              : "failed"
           };
         }
@@ -181,7 +182,7 @@ app.post('/reConfigNumberOfNode', function(req, res) {
       // 	console.log('Connection closed');
       // });
     } else {
-        let formData = {
+        var formData = {
             'result'              : "t"
         };
         res.send(formData);
