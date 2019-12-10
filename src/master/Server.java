@@ -43,8 +43,13 @@ public class Server
 
         public void run() {
           // server is listening on port 8000
-          ServerSocket ss = new ServerSocket(9000);
-          Socket Ws = null;
+            ServerSocket ss = null;
+            try {
+                ss = new ServerSocket(9000);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            Socket Ws = null;
 
           while(true){
             try
@@ -62,8 +67,16 @@ public class Server
 
             }
             catch (Exception e) {
-                Ws.close();
-                ss.close();
+                try {
+                    Ws.close();
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
+                try {
+                    ss.close();
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
                 e.printStackTrace();
                 System.exit(-1);
             }
@@ -111,7 +124,7 @@ public class Server
         private Semaphore wait = new Semaphore(1, true);
 
         private class Dispatcher extends Thread {
-          public void Dispatch(String s) {
+          public void Dispatch(String s) throws InterruptedException {
             String[] Received = s.split("/", 2);
             if(Received[0].equals("p")) {
               GROUP_SIZE = Integer.parseInt(Received[1]);
@@ -154,13 +167,17 @@ public class Server
           public void run()
           {
             while(true){
-              String received;
+              String received = "";
               try{
                 received = Cdis.readUTF();
               } catch (IOException e) {
                   e.printStackTrace();
               }
-              Dispatch(received);
+                try {
+                    Dispatch(received);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
           }
         }
@@ -170,7 +187,7 @@ public class Server
         {
             super(Cs, Cdis, Cdos);
             // this.Job = ;
-            String received;
+            String received = "";
             String toreturn;
             try{
               received = Cdis.readUTF();
@@ -314,8 +331,16 @@ public class Server
 
             } catch(Exception e) {
                 e.printStackTrace();
-                this.Cdis.close();
-                this.Cdos.close();
+                try {
+                    this.Cdis.close();
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
+                try {
+                    this.Cdos.close();
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
             }
         }
     }
@@ -357,6 +382,69 @@ public class Server
               e.printStackTrace();
               System.exit(-1);
           }
+        }
+    }
+
+    static class NextParition {
+        // public static void main(String[] args) {
+        //     System.out.println("Hello");
+        //     String result1 = getNextParition("AAAAA", 10);
+        //     System.out.println(result1);
+        // }
+
+        public static String getNextParition(String lastString, int groupSize) {
+            Map<Integer, Character> toChar = new HashMap<>();
+            for (int i = 0; i < 26; i++) {
+                toChar.put(i, (char) (i + 65));
+            }
+            for (int i = 26; i < 52; i++) {
+                toChar.put(i, (char) (i + 71));
+            }
+
+            Map<Character, Integer> toInt = new HashMap<>();
+            for (int idx : toChar.keySet()) {
+                toInt.put(toChar.get(idx), idx);
+            }
+
+            int[] lastIdx = new int[5];
+            for (int i = 0; i < 5; i++) {
+                lastIdx[i] = toInt.get(lastString.charAt(i));
+            }
+
+            List<Integer> interval = getInterval(groupSize);
+            int[] nextIdx = new int[5];
+            int carry = 0;
+            int idx = 4;
+            while (idx >=0 ) {
+                int digit = lastIdx[idx] + interval.get(idx) + carry;
+                nextIdx[idx] = digit % 52;
+                carry = digit / 52;
+                idx -= 1;
+            }
+
+            if (nextIdx[0] >= 52) {
+                return "-1";
+            }
+
+            String nextString = "";
+            for (int i = 0; i < 5; i++) {
+                nextString += toChar.get(nextIdx[i]);
+            }
+
+            return nextString;
+        }
+
+        public static List<Integer> getInterval(int groupSize) {
+            int gap = groupSize;
+            List<Integer> interval = new LinkedList<>();
+            while (gap > 0) {
+                interval.add(0, gap % 52);
+                gap /= 52;
+            }
+            while (interval.size() < 5) {
+                interval.add(0, 0);
+            }
+            return interval;
         }
     }
 }
