@@ -158,15 +158,23 @@ class JobHandler extends ClientHandler
       public void Dispatch(String s) throws InterruptedException {
         String[] Received = s.split("/");
         if(Received[0].equals("p")) {
+          waitReConfig.acquire();
           GROUP_SIZE = Integer.parseInt(Received[1]);
+          waitReConfig.release();
+          // PrintWriter PCdos = new PrintWriter(Cdos, true);
+          // PCdos.write("OK");
+          // PCdos.flush();
         } else if(Received[0].equals("n")) {
           if(WORKER_SIZE<Integer.parseInt(Received[1])) {
             int increment = Integer.parseInt(Received[1])-WORKER_SIZE;
             available.release(increment);
             waitReConfig.acquire();
-            NextHost = Integer.parseInt(Received[1]);
+            NextHost = Integer.parseInt(Received[1])-1;
             System.out.println("NextHost:                         "+NextHost);
             WORKER_SIZE = Integer.parseInt(Received[1]);
+            // PrintWriter PCdos = new PrintWriter(Cdos, true);
+            // PCdos.write("OK");
+            // PCdos.flush();
             waitReConfig.release();
           } else if(WORKER_SIZE>Integer.parseInt(Received[1])){
             int decrement = WORKER_SIZE-Integer.parseInt(Received[1]);
@@ -184,11 +192,17 @@ class JobHandler extends ClientHandler
               for(Thread t: WorkerJobs.get(Ws)){
                 t.interrupt();
               }
-              WorkerJobs.remove(Ws);
+              // wait.acquire();
+              // WorkerJobs.put(Ws);
+              WorkerJobs.put(Ws, new LinkedList<Thread>());
+              // wait.release();
             }
-            NextHost = Integer.parseInt(Job[1]);
+            NextHost = Integer.parseInt(Received[1])-1;
             System.out.println("NextHost:                         "+NextHost);
-            WORKER_SIZE = Integer.parseInt(Job[1]);
+            WORKER_SIZE = Integer.parseInt(Received[1]);
+            // PrintWriter PCdos = new PrintWriter(Cdos, true);
+            // PCdos.write("OK");
+            // PCdos.flush();
             waitReConfig.release();
           }
         } else {
@@ -205,6 +219,7 @@ class JobHandler extends ClientHandler
           try{
             BufferedReader BCdis = new BufferedReader(new InputStreamReader(Cdis));
             received = BCdis.readLine();
+            System.out.println("job got from client:                              "+received);
           } catch (IOException e) {
               e.printStackTrace();
           }
@@ -325,13 +340,15 @@ class JobHandler extends ClientHandler
               };
               PartHandler.start();
               WorkingPartList.add(PartHandler);
+              // wait.acquire();
               WorkerJobs.get(Ws).add(PartHandler);
+              // wait.release();
               // WorkerJobs.put(Ws, );
               NextHost = (NextHost+1)%WORKER_SIZE;
               System.out.println("NextHost:                         "+NextHost);
-              waitReConfig.release();
               nextHead = NextParition.getNextParition(nextHead, GROUP_SIZE);
               System.out.println("nextHead:                   "+nextHead);
+              waitReConfig.release();
             }
 
             while(reSubmittedParts.size()!=0) {
@@ -397,7 +414,9 @@ class JobHandler extends ClientHandler
               };
               PartHandler.start();
               WorkingPartList.add(PartHandler);
+              // wait.acquire();
               WorkerJobs.get(Ws).add(PartHandler);
+              // wait.acquire();
               NextHost = (NextHost+1)%WORKER_SIZE;
               System.out.println("NextHost:                         "+NextHost);
 
@@ -406,8 +425,8 @@ class JobHandler extends ClientHandler
               // System.out.println("nextHead:                   "+nextHead);
             }
             // closing resources
-            this.Cdis.close();
-            this.Cdos.close();
+            // this.Cdis.close();
+            // this.Cdos.close();
 
         } catch(Exception e) {
             e.printStackTrace();
