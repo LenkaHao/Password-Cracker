@@ -76,7 +76,7 @@ app.post('/getProgess', function(req, res) {
   if (req.session.value) {
     console.log(req.body.Hashed_MD5);
     var client = new net.Socket();
-    client.connect(1337, 'localhost', function() {
+    client.connect(8000, 'localhost', function() {
     	console.log('Connected');
     	client.write("r/"+req.body.Hashed_MD5+"/"+req.body.Number_of_Node+"/"+req.body.Size_of_Partition+"\n");
     });
@@ -85,10 +85,10 @@ app.post('/getProgess', function(req, res) {
     UserDB.set(req.session.value, UserDB.get(req.session.value).set("nodecount", req.body.Number_of_Node));
 
     client.on('data', function(data) {
-      console.log(data);
+      console.log(data.toString());
       // console.log(data.toString());
       var formData = {
-          'Password'              : data
+          'Password'              : data.toString()
       };
       res.send(formData);
     	client.destroy(); // kill client after server's response
@@ -163,7 +163,7 @@ app.post('/reConfigNumberOfNode', function(req, res) {
       // });
 
       client.on('data', function(data) {
-        console.log(data.toString());
+        console.log(data);
         if(data.toString()==="OK") {
           let formData = {
               'result'              : data.toString()

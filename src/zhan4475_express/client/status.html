@@ -23,7 +23,7 @@
                                     <td class="col-md-6">Hashed MD5</td>
                                     <td class="col-md-6">
                                         <div class="form-group">
-                                            <input type="text" class="form-control" name="Hashed_MD5" required maxlength="30">
+                                            <input type="text" class="form-control" name="Hashed_MD5" required pattern=".{32,32}">
                                         </div>
                                     </td>
                                 </tr>
@@ -31,7 +31,7 @@
                                     <td class="col-md-6">Number of Node</td>
                                     <td class="col-md-6">
                                         <div class="form-group">
-                                            <input type="text" class="form-control" name="Number_of_Node" required maxlength="30" onchange="reConfigNumberOfNode()">
+                                            <input type="text" class="form-control" name="Number_of_Node" required onchange="reConfigNumberOfNode()">
                                         </div>
                                     </td>
                                 </tr>
@@ -39,7 +39,7 @@
                                     <td class="col-md-6">Size of Partition</td>
                                     <td class="col-md-6">
                                         <div class="form-group">
-                                            <input type="text" class="form-control" name="Size_of_Partition" required maxlength="30" onchange="reConfigPartitionSize()">
+                                            <input type="text" class="form-control" name="Size_of_Partition" required onchange="reConfigPartitionSize()">
                                         </div>
                                     </td>
                                 </tr>
@@ -92,7 +92,7 @@
               data        : formData, // our data object
           })
           .done(function(result) {
-              console.log(result);
+              console.log(result["Password"]);
               var ListData = '';
               ListData += '<tr id=Entries>';
               ListData += '<td>'+inputMD5+'</td>';
