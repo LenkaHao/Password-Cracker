@@ -8,7 +8,7 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.net.*;
 
-public class WorkerInfo{
+class WorkerInfo{
   private final Socket Ws;
   private final DataInputStream Wdis;
   private final DataOutputStream Wdos;
