@@ -13,8 +13,8 @@ public class Server
 {
     // for loadbalancing
     // worker hostname: thread obj
-    private HashMap<Socket, LinkedList<Thread>> WorkerJobs = new HashMap<>();// !!!!!!! have to init when new worker join
-    private ArrayList<WorkerInfo> WorkerList = new ArrayList<>();            // !!!!!!! have to init when new worker join
+    public static HashMap<Socket, LinkedList<Thread>> WorkerJobs = new HashMap<>();// !!!!!!! have to init when new worker join
+    public static ArrayList<WorkerInfo> WorkerList = new ArrayList<>();            // !!!!!!! have to init when new worker join
     public class WorkerInfo{
       private final Socket Ws;
       private final DataInputStream Wdis;
@@ -72,97 +72,6 @@ public class Server
         }
     }
 
-    private class Dispatcher extends Thread {
-      private final Socket s;
-      private final DataInputStream Cdis;
-      private final DataOutputStream Cdos;
-      private int NextHost = 0;
-      // private static int PartSize = 1000;
-      private int GROUP_SIZE = 1000;
-      private int WORKER_SIZE_BOUND = 10;
-      private int WORKER_SIZE = 0;
-      private Semaphore available = new Semaphore(WORKER_SIZE, true);
-      private Semaphore waitReConfig = new Semaphore(1, true);
-      private ConcurrentLinkedQueue<String> reSubmittedParts = new ConcurrentLinkedQueue<>();
-
-      public Dispatcher(Socket s, DataInputStream Cdis, DataOutputStream Cdos) {
-        this.s = s;
-        this.Cdis = Cdis;
-        this.Cdos = Cdos;
-      }
-      public void Dispatch(String s) {
-        String[] arrOfStr = s.split("/", 2);
-        if(arrOfStr[0].equals("r")) {
-
-          // number of worker
-          int increment = Integer.parseInt(arrOfStr[2]);
-          available.release(increment);
-          WORKER_SIZE = Integer.parseInt(arrOfStr[1]);
-
-          // part size
-          GROUP_SIZE = Integer.parseInt(arrOfStr[3]);
-
-          // job submission
-          Thread t = new JobHandler(arrOfStr, this.s, Cdis, Cdos);
-          t.start();
-
-        } else if(arrOfStr[0].equals("p")) {
-          GROUP_SIZE = Integer.parseInt(arrOfStr[1]);
-        } else if(arrOfStr[0].equals("n")) {
-          if(WORKER_SIZE<Integer.parseInt(arrOfStr[1])) {
-            int increment = Integer.parseInt(arrOfStr[1])-WORKER_SIZE;
-            available.release(increment);
-            waitReConfig.acquire();
-            NextHost = Integer.parseInt(arrOfStr[1]);
-            WORKER_SIZE = Integer.parseInt(arrOfStr[1]);
-            waitReConfig.release();
-          } else if(WORKER_SIZE>Integer.parseInt(arrOfStr[1])){
-            int decrement = WORKER_SIZE-Integer.parseInt(arrOfStr[1]);
-            int count = 0;
-            ArrayList<Socket> removeList = new ArrayList<>(decrement);
-            waitReConfig.acquire();
-            for (Socket key : WorkerJobs.keySet()) {
-                removeList.add(key);
-                count = count + 1;
-                if (count==decrement){
-                  break;
-                }
-            }
-            for(Socket Ws: removeList){
-              for(Thread t: WorkerJobs.get(Ws)){
-                t.interrupt();
-              }
-              WorkerJobs.remove(Ws);
-            }
-            NextHost = Integer.parseInt(arrOfStr[1]);
-            WORKER_SIZE = Integer.parseInt(arrOfStr[1]);
-            waitReConfig.release();
-          }
-
-
-
-          // return null;
-        } else {
-          // return null
-        }
-      }
-
-      @Override
-      public void run()
-      {
-        while(true){
-          String received;
-          try{
-            received = Cdis.readUTF();
-          } catch (IOException e) {
-              e.printStackTrace();
-          }
-
-          Dispatch(received);
-        }
-      }
-    }
-
     // ClientHandler class
     private class ClientHandler extends Thread{
       // DateFormat fordate = new SimpleDateFormat("yyyy/MM/dd");
@@ -170,6 +79,12 @@ public class Server
       protected final DataInputStream Cdis;
       protected final DataOutputStream Cdos;
       protected final Socket Cs;
+      protected int GROUP_SIZE = 1000;
+      // protected int WORKER_SIZE_BOUND = 10;
+      protected int WORKER_SIZE = 0;
+      protected Semaphore available = new Semaphore(WORKER_SIZE, true);
+      protected Semaphore waitReConfig = new Semaphore(1, true);
+      protected ConcurrentLinkedQueue<String> reSubmittedParts = new ConcurrentLinkedQueue<>();
 
       // Constructor
       public ClientHandler(Socket Cs, DataInputStream Cdis, DataOutputStream Cdos)
@@ -186,6 +101,7 @@ public class Server
         // private Semaphore available = new Semaphore(WORKER_SIZE, true);
         // private Semaphore wait = new Semaphore(1, true);
         private final String[] Job;
+        private int NextHost = 0;
         private String nextHead = "AAAAA";
         // private int
         private String result = "";
@@ -193,19 +109,93 @@ public class Server
         public Map<String, Boolean> partitions;// start, working
         private Semaphore wait = new Semaphore(1, true);
 
+        private class Dispatcher extends Thread {
+          public void Dispatch(String s) {
+            Job = s.split("/", 2);
+            if(Job[0].equals("p")) {
+              GROUP_SIZE = Integer.parseInt(Job[1]);
+            } else if(Job[0].equals("n")) {
+              if(WORKER_SIZE<Integer.parseInt(Job[1])) {
+                int increment = Integer.parseInt(Job[1])-WORKER_SIZE;
+                available.release(increment);
+                waitReConfig.acquire();
+                NextHost = Integer.parseInt(Job[1]);
+                WORKER_SIZE = Integer.parseInt(Job[1]);
+                waitReConfig.release();
+              } else if(WORKER_SIZE>Integer.parseInt(Job[1])){
+                int decrement = WORKER_SIZE-Integer.parseInt(Job[1]);
+                int count = 0;
+                ArrayList<Socket> removeList = new ArrayList<>(decrement);
+                waitReConfig.acquire();
+                for (Socket key : WorkerJobs.keySet()) {
+                    removeList.add(key);
+                    count = count + 1;
+                    if (count==decrement){
+                      break;
+                    }
+                }
+                for(Socket Ws: removeList){
+                  for(Thread t: WorkerJobs.get(Ws)){
+                    t.interrupt();
+                  }
+                  WorkerJobs.remove(Ws);
+                }
+                NextHost = Integer.parseInt(Job[1]);
+                WORKER_SIZE = Integer.parseInt(Job[1]);
+                waitReConfig.release();
+              }
+            } else {
+              System.out.println("I should never go to here.");
+            }
+          }
+
+          @Override
+          public void run()
+          {
+            while(true){
+              String received;
+              try{
+                received = Cdis.readUTF();
+              } catch (IOException e) {
+                  e.printStackTrace();
+              }
+              Dispatch(received);
+            }
+          }
+        }
 
         // Constructor
-        public JobHandler(String[] Job, Socket Cs, DataInputStream Cdis, DataOutputStream Cdos)
+        public JobHandler(Socket Cs, DataInputStream Cdis, DataOutputStream Cdos)
         {
             super(Cs, Cdis, Cdos);
-            this.Job = Job;
+            // this.Job = ;
         }
 
         @Override
         public void run()
         {
-            String received;
-            String toreturn;
+          String received;
+          String toreturn;
+          try{
+            received = Cdis.readUTF();
+          } catch (IOException e) {
+              e.printStackTrace();
+          }
+
+          this.Job = s.split("/", 2);
+
+          // number of worker
+          int increment = Integer.parseInt(Job[2]);
+          available.release(increment);
+          WORKER_SIZE = Integer.parseInt(Job[1]);
+          // part size
+          GROUP_SIZE = Integer.parseInt(Job[3]);
+
+          // create a new thread object
+          Thread Ct = new Dispatcher();
+
+          // Invoking the start() method
+          Ct.start();
 
 
             try
@@ -352,7 +342,7 @@ public class Server
               System.out.println("Assigning new thread for this client");
 
               // create a new thread object
-              Thread Ct = new Dispatcher(Cs, Cdis, Cdos);
+              Thread Ct = new JobHandler(Cs, Cdis, Cdos);
 
               // Invoking the start() method
               Ct.start();
