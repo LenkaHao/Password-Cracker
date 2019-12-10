@@ -134,68 +134,68 @@ public class Server
         }
     }
 }
-// static class NextParition {
-//     // public static void main(String[] args) {
-//     //     System.out.println("Hello");
-//     //     String result1 = getNextParition("AAAAA", 10);
-//     //     System.out.println(result1);
-//     // }
-//
-//     public static String getNextParition(String lastString, int groupSize) {
-//         Map<Integer, Character> toChar = new HashMap<>();
-//         for (int i = 0; i < 26; i++) {
-//             toChar.put(i, (char) (i + 65));
-//         }
-//         for (int i = 26; i < 52; i++) {
-//             toChar.put(i, (char) (i + 71));
-//         }
-//
-//         Map<Character, Integer> toInt = new HashMap<>();
-//         for (int idx : toChar.keySet()) {
-//             toInt.put(toChar.get(idx), idx);
-//         }
-//
-//         int[] lastIdx = new int[5];
-//         for (int i = 0; i < 5; i++) {
-//             lastIdx[i] = toInt.get(lastString.charAt(i));
-//         }
-//
-//         List<Integer> interval = getInterval(groupSize);
-//         int[] nextIdx = new int[5];
-//         int carry = 0;
-//         int idx = 4;
-//         while (idx >=0 ) {
-//             int digit = lastIdx[idx] + interval.get(idx) + carry;
-//             nextIdx[idx] = digit % 52;
-//             carry = digit / 52;
-//             idx -= 1;
-//         }
-//
-//         if (nextIdx[0] >= 52) {
-//             return "-1";
-//         }
-//
-//         String nextString = "";
-//         for (int i = 0; i < 5; i++) {
-//             nextString += toChar.get(nextIdx[i]);
-//         }
-//
-//         return nextString;
-//     }
-//
-//     public static List<Integer> getInterval(int groupSize) {
-//         int gap = groupSize;
-//         List<Integer> interval = new LinkedList<>();
-//         while (gap > 0) {
-//             interval.add(0, gap % 52);
-//             gap /= 52;
-//         }
-//         while (interval.size() < 5) {
-//             interval.add(0, 0);
-//         }
-//         return interval;
-//     }
-// }
+ static class NextParition {
+     // public static void main(String[] args) {
+     //     System.out.println("Hello");
+     //     String result1 = getNextParition("AAAAA", 10);
+     //     System.out.println(result1);
+     // }
+
+     public static String getNextParition(String lastString, int groupSize) {
+         Map<Integer, Character> toChar = new HashMap<>();
+         for (int i = 0; i < 26; i++) {
+             toChar.put(i, (char) (i + 65));
+         }
+         for (int i = 26; i < 52; i++) {
+             toChar.put(i, (char) (i + 71));
+         }
+
+         Map<Character, Integer> toInt = new HashMap<>();
+         for (int idx : toChar.keySet()) {
+             toInt.put(toChar.get(idx), idx);
+         }
+
+         int[] lastIdx = new int[5];
+         for (int i = 0; i < 5; i++) {
+             lastIdx[i] = toInt.get(lastString.charAt(i));
+         }
+
+         List<Integer> interval = getInterval(groupSize);
+         int[] nextIdx = new int[5];
+         int carry = 0;
+         int idx = 4;
+         while (idx >=0 ) {
+             int digit = lastIdx[idx] + interval.get(idx) + carry;
+             nextIdx[idx] = digit % 52;
+             carry = digit / 52;
+             idx -= 1;
+         }
+
+         if (nextIdx[0] >= 52) {
+             return "-1";
+         }
+
+         String nextString = "";
+         for (int i = 0; i < 5; i++) {
+             nextString += toChar.get(nextIdx[i]);
+         }
+
+         return nextString;
+     }
+
+     public static List<Integer> getInterval(int groupSize) {
+         int gap = groupSize;
+         List<Integer> interval = new LinkedList<>();
+         while (gap > 0) {
+             interval.add(0, gap % 52);
+             gap /= 52;
+         }
+         while (interval.size() < 5) {
+             interval.add(0, 0);
+         }
+         return interval;
+     }
+ }
 
 
 
@@ -355,11 +355,15 @@ class JobHandler extends ClientHandler
                       } else {
                         result = line;
                       }
-                    } catch(InterruptedException e) { // only when blocked!!!!!!!!!!!!!!
+                    } catch(InterruptedException | IOException e) { // only when blocked!!!!!!!!!!!!!!
                         // System.exit(-1);
                         reSubmittedParts.add(Job[1]+"/"+nextHead+"/"+GROUP_SIZE+"\n");
                         // wait.release();
-                        Wout.writeUTF("QUIT\n");
+                        try {
+                            Wout.writeUTF("QUIT\n");
+                        } catch (IOException ex) {
+                            ex.printStackTrace();
+                        }
                         System.out.println("I was killed!");
 
                     }
@@ -411,11 +415,15 @@ class JobHandler extends ClientHandler
                       } else {
                         result = line;
                       }
-                    } catch(InterruptedException e) {
+                    } catch(InterruptedException | IOException e) {
                         // System.exit(-1);
                         reSubmittedParts.add(Job[1]+"/"+nextHead+"/"+GROUP_SIZE+"\n");
                         // wait.release();
-                        Wout.writeUTF("QUIT\n");
+                        try {
+                            Wout.writeUTF("QUIT\n");
+                        } catch (IOException ex) {
+                            ex.printStackTrace();
+                        }
                         System.out.println("I was killed!");
 
                     }
