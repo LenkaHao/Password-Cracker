@@ -4,8 +4,8 @@
 Worker::Worker(const char *host, const uint32_t port) : hostname(host) {
   Worker::state = INIT;
   if (host == nullptr) {
-    std::cout << "Worker: undefined hostname, using localhost ..." << std::endl;
-    hostname = "localhost";
+    std::cout << "Worker: undefined hostname, using master ..." << std::endl;
+    hostname = "master";
   }
   std::cout << "Worker: initializing a client instance ..." << std::endl;
   std::cout << "Worker: collecting host information ..." << std::endl;
