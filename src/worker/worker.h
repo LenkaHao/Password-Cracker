@@ -82,5 +82,4 @@ int sendAll(int sockfd, const std::string &msg, uint32_t size);
 int receiveAll(int sockfd, std::string &msg);
 bool parseTask(const std::string &msg, Task *task);
 std::string nextPermutation(const std::string &pwd);
-std::string nextPartition(const std::string &head, uint32_t size);
 #endif //WORKER_WORKER_H
