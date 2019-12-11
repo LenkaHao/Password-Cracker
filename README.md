@@ -1,4 +1,9 @@
-### Deploy the project on GENI
+## Run password cracker
+
+If you're running the project on nodes that are already reserved by us, please go to Section 2 directly.
+Otherwise, start with Section 1 to set up servers on GENI.
+
+### Section 1: Deploy the project on GENI
 
 1. Reserve resources on GENI
 
@@ -6,7 +11,7 @@
 
 2. Set up the web server
 
-   Log into the node with clientID "webserver" and run the following one by one:
+   Log into the node with clientID "Webserver" and run the following one by one:
 
    \$ wget https://raw.github.com/LenkaHao/Password-Cracker/master/src/webserver.sh
    
@@ -42,14 +47,15 @@
    
    \$ ./worker.out
 
-5. In a web browser, go to "webserver_ip:9007", where webserver_ip can be found on GENI.
-
-   Enter md5 hash, number of workers (1-5) and size of a partition (e.g. 1000)
-
-   Wait until the result comes back. 
-
-   To change the number of workers on the fly, enter a number for workers. Do no click "Submit". The web interface will dynamically detect the change.
    
-User interactions of the web interface can be found in the project report.
+### Section 2: Use the web interface to interact
 
+1.  In a web browser, go to "webserver_ip:9007", where webserver_ip can be found on GENI.
+
+    For our resource, go to http://72.36.65.84:9007/
+    
+    Enter md5 hash, number of workers (1-5) and size of a partition (e.g. 1000)
    
+    Wait until the result comes back. 
+   
+    To change the number of workers on the fly, enter a number for workers. Do no click "Submit". The web interface will dynamically detect the change.
