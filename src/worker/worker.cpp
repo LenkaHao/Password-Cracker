@@ -193,15 +193,17 @@ int main(int argc, char *argv[]) {
       continue;
     }
     // halt current crack task
-    if (message == "QUIT\n" && state == CRACK) {
-      std::cout << "Worker: interrupt current crack task " << std::endl;
-      mtx.lock();
-      worker.setState(TERMINATE);
-      mtx.unlock();
-      // signal master to reassign the task
-      std::string exp_msg = "00000";
-      exp_msg.append(ENDMSG);
-      sendAll(worker.getSocketFd(), exp_msg, exp_msg.length());
+    if (message == "QUIT\n") {
+      if (state == CRACK) {
+        std::cout << "Worker: interrupt current crack task " << std::endl;
+        mtx.lock();
+        worker.setState(TERMINATE);
+        mtx.unlock();
+        // signal master to reassign the task
+        std::string exp_msg = "00000";
+        exp_msg.append(ENDMSG);
+        sendAll(worker.getSocketFd(), exp_msg, exp_msg.length());
+      }
       continue;
     }
     // handling crack task
