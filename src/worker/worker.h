@@ -33,7 +33,7 @@ struct Task {
 
 class Worker {
 public:
-  Worker() : Worker("localhost", DEFAULTPORT) {
+  Worker() : Worker("master", DEFAULTPORT) {
     std::cout << "Worker: undefined host name, using localhost with port: 58000" << std::endl;
   }
   Worker(const char *host, const uint32_t port);

@@ -157,10 +157,10 @@ int main(int argc, char *argv[]) {
     if (argc > 2) {
       char *tmp = argv[2];
       port = strtoul(tmp, nullptr, 10);
-      if (port >= DEFAULTPORT && port <= 58999) {
+      if (port >= DEFAULTPORT && port <= 9999) {
         std::cout << "Worker: using port: " << port << std::endl;
       } else {
-        std::cout << "Worker: invalid port number, use number between: 58000 - 58999  "<<std::endl;
+        std::cout << "Worker: invalid port number, use number between: 9000 - 9999  "<<std::endl;
         exit(0);
       }
     }
