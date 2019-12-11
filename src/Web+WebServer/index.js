@@ -77,7 +77,7 @@ app.post('/getProgess', function(req, res) {
     console.log(req.body.Hashed_MD5);
     client = new net.Socket();
     client.setKeepAlive(true, 60000);
-    client.connect(8000, 'Master', function() {
+    client.connect(8000, 'master', function() {
     	console.log('Connected');
     	client.write("r/"+req.body.Hashed_MD5+"/"+req.body.Number_of_Node+"/"+req.body.Size_of_Partition+"\n");
     });
