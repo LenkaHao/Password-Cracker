@@ -200,7 +200,7 @@ int main(int argc, char *argv[]) {
         worker.setState(TERMINATE);
         mtx.unlock();
         // signal master to reassign the task
-        std::string exp_msg = "00000";
+        std::string exp_msg = "22222";
         exp_msg.append(ENDMSG);
         sendAll(worker.getSocketFd(), exp_msg, exp_msg.length());
       }
