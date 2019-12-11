@@ -1,4 +1,8 @@
-﻿<html>
+TODO: disable button
+TODO: alert
+TODO: local host name
+
+<html>
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -44,17 +48,9 @@
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td class="col-md-6">Target Host</td>
-                                    <td class="col-md-6">
-                                        <div class="form-group">
-                                            <input type="text" class="form-control" name="Target_Host" required>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
                                     <td class="col-md-6"></td>
                                     <td class="col-md-6">
-                                        <input type="submit" value="Submit">
+                                        <input type="submit" value="Submit" name="submission">
                                     </td>
                                 </tr>
                             </tbody>
@@ -84,7 +80,9 @@
         // event.preventDefault();
         // process the form
         $('form').submit(function(event) {
+          $('input[name=submission]').attr("disabled", true);
           var date1 = new Date();
+          console.log(date1);
           event.preventDefault();
           console.log($('input[name=Hashed_MD5]').val());
           var inputMD5 = $('input[name=Hashed_MD5]').val();
@@ -97,13 +95,14 @@
           // process the form
           $.ajax({
               type        : 'POST', // define the type of HTTP verb we want to use (POST for our form)
-              url         : 'http://'+targetHost+':9007/getProgess', // the url where we want to POST
+              url         : 'http://'+document.location.hostname+':9007/getProgess', // the url where we want to POST
               data        : formData, // our data object
           })
           .done(function(result) {
               console.log(result["Password"]);
               var date2 = new Date();
               var diff = date2 - date1; //milliseconds interval
+              console.log(diff);
               var ListData = '';
               ListData += '<tr id=Entries>';
               ListData += '<td>'+inputMD5+'</td>';
@@ -113,7 +112,8 @@
 
           // We use .html instead of .append here, to make sure we don't add the same
           // entries when the interval is ran for the n-th time.
-          $('#Entries').replaceWith(ListData);
+          // $('#Entries').append(ListData);
+          $('#displayTable tr:last').after(ListData);
           // setInterval(FetchProgress(), 500);
           })
           .fail(function(xhr, status, error) {
@@ -121,6 +121,7 @@
               alert(error);
           })
           .always(function(data){
+            $('input[name=submission]').attr("disabled", false);
           });
         });
       });
@@ -131,7 +132,7 @@
         };
         $.ajax({
             type        : 'POST', // define the type of HTTP verb we want to use (POST for our form)
-            url         : 'http://'+targetHost+':9007/reConfigNumberOfNode', // the url where we want to POST
+            url         : 'http://'+document.location.hostname+':9007/reConfigNumberOfNode', // the url where we want to POST
             data        : formData, // our data object
         })
         // .always(function(data){
@@ -151,7 +152,7 @@
         };
         $.ajax({
             type        : 'POST', // define the type of HTTP verb we want to use (POST for our form)
-            url         : 'http://'+targetHost+':9007/reConfigPartitionSize', // the url where we want to POST
+            url         : 'http://'+document.location.hostname+':9007/reConfigPartitionSize', // the url where we want to POST
             data        : formData, // our data object
         })
         // .always(function(data){
@@ -159,6 +160,14 @@
         //   //   window.alert();
         //   // }
         // });
+      }
+      function NumberOfNodeCheck(value, min, max)
+      {
+          if(parseInt($('Number_of_Node').val()) < $('Number_of_Node').attr('min'))
+              return false;
+          else if(parseInt($('Number_of_Node').val()) > $('Number_of_Node').attr('max'))
+              return false;
+          else return true;
       }
     </script>
   </body>
