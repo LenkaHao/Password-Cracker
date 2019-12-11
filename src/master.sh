@@ -14,4 +14,4 @@ echo "Environment (Java) is set up!"
 
 echo "Compiling ..."
 javac *.java
-echo "Compile done. Please run $ java ./Server to start!"
+echo "Compile done. Please run $ java Server to start!"

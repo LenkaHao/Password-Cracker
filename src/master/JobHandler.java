@@ -200,7 +200,7 @@ class JobHandler extends ClientHandler
                   }
               };
               PartHandler.start();
-              nextHead = NextParition.getNextParition(nextHead, GROUP_SIZE);
+              nextHead = NextPartition.getNextPartition(nextHead, GROUP_SIZE);
               System.out.println("nextHead:                   "+nextHead);
               waitReConfig.release();
             }

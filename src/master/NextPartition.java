@@ -4,14 +4,14 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.net.*;
 
-class NextParition {
+class NextPartition {
      // public static void main(String[] args) {
      //     System.out.println("Hello");
      //     String result1 = getNextParition("AAAAA", 10);
      //     System.out.println(result1);
      // }
 
-     public static String getNextParition(String lastString, int groupSize) {
+     public static String getNextPartition(String lastString, int groupSize) {
          Map<Integer, Character> toChar = new HashMap<>();
          for (int i = 0; i < 26; i++) {
              toChar.put(i, (char) (i + 65));
