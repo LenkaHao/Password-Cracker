@@ -18,4 +18,4 @@ sudo apt-get install npm
 sudo npm install
 echo "Environment (NodeJS) is set up!"
 
-echo "Please run $ ./index.js to start!"
+echo "Please run $ node index.js to start!"
