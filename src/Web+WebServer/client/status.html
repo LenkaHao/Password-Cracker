@@ -71,7 +71,7 @@
                   <tr>
                       <th scope="col">Hashed MD5</th>
                       <th scope="col">Number of Tried Combination</th>
-                      <!-- <th scope="col">Progress</th> -->
+                      <th scope="col">Turn Around Time(ms)</th>
                   </tr>
                   <tr id="Entries">
                   </tr>
@@ -84,6 +84,7 @@
         // event.preventDefault();
         // process the form
         $('form').submit(function(event) {
+          var date1 = new Date();
           event.preventDefault();
           console.log($('input[name=Hashed_MD5]').val());
           var inputMD5 = $('input[name=Hashed_MD5]').val();
@@ -101,10 +102,13 @@
           })
           .done(function(result) {
               console.log(result["Password"]);
+              var date2 = new Date();
+              var diff = date2 - date1; //milliseconds interval
               var ListData = '';
               ListData += '<tr id=Entries>';
               ListData += '<td>'+inputMD5+'</td>';
               ListData += '<td>'+result["Password"]+'</td>';
+              ListData += '<td>'+diff+'</td>';
               ListData += '</tr>';
 
           // We use .html instead of .append here, to make sure we don't add the same
