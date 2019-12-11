@@ -23,7 +23,7 @@
 #define MAXHOSTNAME 255
 #define ENDMSG "\n"
 
-enum Status{INIT, READY, IDLE, CRACK, TERMINATE};
+enum Status{INIT, IDLE, CRACK, TERMINATE};
 
 struct Task {
   std::string pwd_md5;

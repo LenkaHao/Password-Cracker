@@ -119,28 +119,30 @@ void crack(int sockfd, Task *task, Worker *worker) {
     Status state = worker->getState();
     mtx.unlock();
     if (state == TERMINATE) {
-      std::cout << "Worker: STOP CRACKING! cracking thread ends ..." << std::endl;
+      std::cout << "Worker: TERMINATING! cracking thread exits ..." << std::endl;
       return;
     }
     if (task->pwd_md5 == GetMD5String(pwd_str)) {
+      std::cout << "Worker: PWD FOUND! ";
       std::string snd_pwd = pwd_str;
       snd_pwd.append(ENDMSG);
       sendAll(sockfd, snd_pwd, snd_pwd.length());
       mtx.lock();
       worker->setState(IDLE);
       mtx.unlock();
-      std::cout << "Worker: PWD FOUND! cracking thread ends ..." << std::endl;
+      std::cout << "cracking thread exits ... " << std::endl;
       return;
     }
     pwd_str = nextPermutation(pwd_str);
     ++count;
   }
-  // Failed
+  // Not found
+  std::cout << "Worker: PWD NOT FOUND! ";
   sendAll(sockfd, std::string("00000\n"), 6);
   mtx.lock();
   worker->setState(IDLE);
   mtx.unlock();
-  std::cout << "Worker: PWD NOT FOUND! cracking thread ends ..." << std::endl;
+  std::cout << "cracking thread exits ..." << std::endl;
 }
 
 int main(int argc, char *argv[]) {
@@ -169,7 +171,7 @@ int main(int argc, char *argv[]) {
     exit(1);
   }
   std::cout << "Worker: connected with host successfully ..." << std::endl;
-  worker.setState(READY);
+  worker.setState(IDLE);
 
   // wait for a cracking task
   Task task;
@@ -186,7 +188,7 @@ int main(int argc, char *argv[]) {
     if (!qualified)  {
       std::string exp_msg = "00000";
       exp_msg.append(ENDMSG);
-      std::cout << "Worker: unqualified order " << std::endl;
+      std::cerr << "Worker: error, unrecognized cracking order from master! " << std::endl;
       sendAll(worker.getSocketFd(), exp_msg, exp_msg.length());
       continue;
     }
@@ -198,14 +200,21 @@ int main(int argc, char *argv[]) {
       mtx.unlock();
       continue;
     }
-    // or start a new crack task
-    if (state == READY || state == IDLE) {
+    // handling crack task
+    if (state == IDLE) {
+      // start a thread for the crack task
       std::cout << "Worker: starting a thread for a new crack task " << std::endl;
       mtx.lock();
       worker.setState(CRACK);
       mtx.unlock();
       std::thread t1(crack, worker.getSocketFd(), &task, &worker);
       t1.detach();
+    } else {
+      // failed to start the received crack task
+      std::string exp_msg = "00000";
+      exp_msg.append(ENDMSG);
+      std::cout << "Worker: busy, unable to start a new task " << std::endl;
+      sendAll(worker.getSocketFd(), exp_msg, exp_msg.length());
     }
   }
 }
