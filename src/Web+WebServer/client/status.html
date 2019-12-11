@@ -121,15 +121,15 @@
             url         : 'http://localhost:9007/reConfigNumberOfNode', // the url where we want to POST
             data        : formData, // our data object
         })
-        .always(function(data){
-          console.log(data);
-          if(data["result"]==="t"){
-            window.alert("after submit, user can change 2nd and 3rd cell to change accordingly");
-          }
-          else if(!data["result"]==="OK"){
-            window.alert("");
-          }
-        });
+        // .always(function(data){
+        //   // console.log(data);
+        //   // if(data["result"]==="t"){
+        //   //   window.alert("after submit, user can change 2nd and 3rd cell to change accordingly");
+        //   // }
+        //   // else if(!data["result"]==="OK"){
+        //   //   window.alert("");
+        //   // }
+        // });
       }
       function reConfigPartitionSize(){
         var formData = {
@@ -140,11 +140,11 @@
             url         : 'http://localhost:9007/reConfigPartitionSize', // the url where we want to POST
             data        : formData, // our data object
         })
-        .always(function(data){
-          if(!data["result"]==="OK"){
-            window.alert();
-          }
-        });
+        // .always(function(data){
+        //   // if(!data["result"]==="OK"){
+        //   //   window.alert();
+        //   // }
+        // });
       }
     </script>
   </body>

@@ -120,27 +120,27 @@ app.post('/reConfigPartitionSize', function(req, res) {
         UserDB.set(req.session.value, UserDB.get(req.session.value).set("partitionsize", req.body.Size_of_Partition));
       // });
 
-      client.on('data', function(data) {
-        console.log(data.toString());
-        if(data.toString()==="OK") {
-          var formData = {
-              'result'              : data.toString()
-          };
-        } else {
-          var formData = {
-              'result'              : "failed"
-          };
-        }
-        res.send(formData);
-      	// client.destroy(); // kill client after server's response
-      });
+      // client.on('data', function(data) {
+      //   console.log(data.toString());
+      //   if(data.toString()==="OK") {
+      //     var formData = {
+      //         'result'              : data.toString()
+      //     };
+      //   } else {
+      //     var formData = {
+      //         'result'              : "failed"
+      //     };
+      //   }
+      //   res.send(formData);
+      // 	// client.destroy(); // kill client after server's response
+      // });
     } else {
-        var formData = {
-            'result'              : "t"
-        };
-        res.send(formData);
+        // var formData = {
+        //     'result'              : "t"
+        // };
+        // res.send(formData);
     }
-
+    res.end("done");
     // client.on('close', function() {
     // 	console.log('Connection closed');
     // });
@@ -159,34 +159,36 @@ app.post('/reConfigNumberOfNode', function(req, res) {
     if(client) {
       // client.connect(1337, 'localhost', function() {
       // 	console.log('Connected');
+      console.log("n/"+req.body.Number_of_Node+"\n");
       client.write("n/"+req.body.Number_of_Node+"\n");
       UserDB.set(req.session.value, UserDB.get(req.session.value).set("nodecount", req.body.Number_of_Node));
       // });
 
-      client.on('data', function(data) {
-        console.log(data);
-        if(data.toString()==="OK") {
-          var formData = {
-              'result'              : data.toString()
-          };
-        } else {
-          var formData = {
-              'result'              : "failed"
-          };
-        }
-        res.send(formData);
-      	// client.destroy(); // kill client after server's response
-      });
+      // client.on('data', function(data) {
+      //   console.log(data);
+      //   if(data.toString()==="OK") {
+      //     var formData = {
+      //         'result'              : data.toString()
+      //     };
+      //   } else {
+      //     var formData = {
+      //         'result'              : "failed"
+      //     };
+      //   }
+      //   res.send(formData);
+      // 	// client.destroy(); // kill client after server's response
+      // });
 
       // client.on('close', function() {
       // 	console.log('Connection closed');
       // });
     } else {
-        var formData = {
-            'result'              : "t"
-        };
-        res.send(formData);
-      }
+      //   var formData = {
+      //       'result'              : "t"
+      //   };
+      //   res.send(formData);
+    }
+    res.end("done");
   } else {
     console.log("haven't login");
     res.redirect('/');
