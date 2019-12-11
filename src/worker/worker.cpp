@@ -120,6 +120,9 @@ void crack(int sockfd, Task *task, Worker *worker) {
     mtx.unlock();
     if (state == TERMINATE) {
       std::cout << "Worker: TERMINATING! cracking thread exits ..." << std::endl;
+      mtx.lock();
+      worker->setState(IDLE);
+      mtx.unlock();
       return;
     }
     if (task->pwd_md5 == GetMD5String(pwd_str)) {
@@ -186,7 +189,8 @@ int main(int argc, char *argv[]) {
     // parse cracking task
     bool qualified = parseTask(message, &task);
     if (!qualified)  {
-      std::string exp_msg = "00000";
+      // signal "0": Failure due to message format, idle
+      std::string exp_msg = "0";
       exp_msg.append(ENDMSG);
       std::cerr << "Worker: error, unrecognized cracking order from master! " << std::endl;
       sendAll(worker.getSocketFd(), exp_msg, exp_msg.length());
@@ -200,8 +204,17 @@ int main(int argc, char *argv[]) {
         worker.setState(TERMINATE);
         mtx.unlock();
         // signal master to reassign the task
-        std::string exp_msg = "22222";
+        std::string exp_msg = "EXIT";
         exp_msg.append(ENDMSG);
+        while (true) {
+          std::this_thread::sleep_for(std::chrono::milliseconds(50));
+          mtx.lock();
+          if (worker.getState() == IDLE) {
+            mtx.unlock();
+            break;
+          }
+          mtx.unlock();
+        }
         sendAll(worker.getSocketFd(), exp_msg, exp_msg.length());
       }
       continue;
@@ -217,7 +230,8 @@ int main(int argc, char *argv[]) {
       t1.detach();
     } else {
       // failed to start the received crack task
-      std::string exp_msg = "00000";
+      // signal "-1": Failure due to ongoing work, not idle
+      std::string exp_msg = "-1";
       exp_msg.append(ENDMSG);
       std::cout << "Worker: busy, unable to start a new task " << std::endl;
       sendAll(worker.getSocketFd(), exp_msg, exp_msg.length());
