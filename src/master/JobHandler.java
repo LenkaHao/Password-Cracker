@@ -19,6 +19,7 @@ class JobHandler extends ClientHandler
     private String result = "";
     // TODO:  remove entry in this list
     private ConcurrentLinkedQueue<Integer> IdleList = new ConcurrentLinkedQueue<>();
+    private Boolean keeplistening = true;
     // public Map<String, Boolean> partitions;// start, working
     // private Semaphore wait = new Semaphore(1, true);
 
@@ -72,7 +73,7 @@ class JobHandler extends ClientHandler
       @Override
       public void run()
       {
-        while(true){
+        while(keeplistening){
           String received = "";
           try{
             BufferedReader BCdis = new BufferedReader(new InputStreamReader(Cdis));
@@ -172,27 +173,30 @@ class JobHandler extends ClientHandler
                       BufferedReader BWin = new BufferedReader(new InputStreamReader(Win));
                       line = BWin.readLine();
                       System.out.println("data received: " + line);
-                      if(line.equals("11111")) { // to next
+                      if(line.equals("1")) { // to next
                         // System.out.println("rep from worker:                    "+line);
-                      } else if(line.equals("00000")){  // failed
+                      } else if(line.equals("-1")){  // failed
                         // System.out.println("rep from worker:                    "+line);
                         reSubmittedParts.add(Job[1]+" "+nextHead+" "+GROUP_SIZE+"\n");
                         System.out.println("reSubmittedParts:                   "+Arrays.toString(reSubmittedParts.toArray()));
-                      } else if(line.equals("22222")){
+                      } else if(line.equals("EXIT")){
                         reSubmittedParts.add(Job[1]+" "+nextHead+" "+GROUP_SIZE+"\n");
                         System.out.println("reSubmittedParts:                   "+Arrays.toString(reSubmittedParts.toArray()));
                         quitted = true;
+                      } else if(line.equals("0")){
+                        throw new Exception("my format was wrong!!!");
                       } else {  // done!
                         result = line;
                         // System.out.println("                                    done");
                       }
-                    } catch( IOException e) { // only when blocked!!!!!!!!!!!!!!
+                    } catch( Exception e) { // only when blocked!!!!!!!!!!!!!!
                       e.printStackTrace();
                     }
                     if(!quitted) {
                       IdleList.add(thisHost);
                       System.out.println("thisHost :                 "+thisHost);
                       System.out.println("2 "+Arrays.toString(IdleList.toArray()));
+                      // System.out.println("2 IdleList");
                     }
                     available.release();
                     // System.out.println("IdleList.size():              "+IdleList.size());
@@ -239,23 +243,32 @@ class JobHandler extends ClientHandler
                       PWout.flush();
                       BufferedReader BWin = new BufferedReader(new InputStreamReader(Win));
                       line = BWin.readLine();
-                      if(line.equals("11111")) {
-
-                      } else if(line.equals("00000")){  // failed
+                      if(line.equals("1")) { // to next
+                        // System.out.println("rep from worker:                    "+line);
+                      } else if(line.equals("-1")){  // failed
                         // System.out.println("rep from worker:                    "+line);
                         reSubmittedParts.add(Job[1]+" "+nextHead+" "+GROUP_SIZE+"\n");
-                        // System.out.println("reSubmittedParts:                   "+reSubmittedParts.peek());
-                      } else if(line.equals("22222")){
+                        System.out.println("reSubmittedParts:                   "+Arrays.toString(reSubmittedParts.toArray()));
+                      } else if(line.equals("EXIT")){
                         reSubmittedParts.add(Job[1]+" "+nextHead+" "+GROUP_SIZE+"\n");
+                        System.out.println("reSubmittedParts:                   "+Arrays.toString(reSubmittedParts.toArray()));
                         quitted = true;
-                      } else {
+                      } else if(line.equals("0")){
+                        throw new Exception("my format was wrong!!!");
+                      } else {  // done!
                         result = line;
+                        // System.out.println("                                    done");
                       }
-                    } catch(IOException e) {
+                    } catch(Exception e) {
                         e.printStackTrace();
                     }
-                    IdleList.add(NextHost);
-                    System.out.println("3 "+Arrays.toString(IdleList.toArray()));
+                    if(!quitted) {
+                      IdleList.add(thisHost);
+                      System.out.println("thisHost :                 "+thisHost);
+                      System.out.println("2 "+Arrays.toString(IdleList.toArray()));
+                      // System.out.println("2 IdleList");
+                    }
+                    // System.out.println("3 IdleList");
                     available.release();
                     // System.out.println("IdleList.size():              "+IdleList.size());
                     // System.out.println("available.availablePermits(): "+available.availablePermits());
@@ -267,6 +280,7 @@ class JobHandler extends ClientHandler
 
         } catch(Exception e) {
             e.printStackTrace();
+            keeplistening = false;
             try {
                 this.Cdis.close();
             } catch (IOException ex) {
