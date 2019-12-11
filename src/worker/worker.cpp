@@ -183,7 +183,7 @@ int main(int argc, char *argv[]) {
     Status state = worker.getState();
     mtx.unlock();
 
-    // parse mission into task
+    // parse cracking task
     bool qualified = parseTask(message, &task);
     if (!qualified)  {
       std::string exp_msg = "00000";
@@ -198,6 +198,10 @@ int main(int argc, char *argv[]) {
       mtx.lock();
       worker.setState(TERMINATE);
       mtx.unlock();
+      // signal master to reassign the task
+      std::string exp_msg = "00000";
+      exp_msg.append(ENDMSG);
+      sendAll(worker.getSocketFd(), exp_msg, exp_msg.length());
       continue;
     }
     // handling crack task
