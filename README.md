@@ -1,4 +1,4 @@
-Deploy the project on GENI
+### Deploy the project on GENI
 
 1. Reserve resources on GENI
 
@@ -9,8 +9,11 @@ Deploy the project on GENI
    Log into the node with clientID "webserver" and run the following one by one:
 
    \$ wget https://raw.github.com/LenkaHao/Password-Cracker/master/src/webserver.sh
+   
    \$ chmod +x webserver.sh
+   
    \$ ./webserver.sh
+   
    \$ node index.js
 
 3. Set up the master
@@ -18,8 +21,11 @@ Deploy the project on GENI
    Log into the node with clientID "master"
 
    \$ wget https://raw.github.com/LenkaHao/Password-Cracker/master/src/master.sh
+   
    \$ chmod +x master.sh
+   
    \$ ./master.sh
+   
    \$ java Server
 
 4. Set up workers
@@ -29,8 +35,11 @@ Deploy the project on GENI
    Run the following commands:
 
    \$ wget https://raw.github.com/LenkaHao/Password-Cracker/master/src/worker.sh
+   
    \$ chmod +x worker.sh
+   
    \$ ./worker.sh
+   
    \$ ./worker.out
 
 5. In a web browser, go to "webserver_ip:9007", where webserver_ip can be found on GENI.
