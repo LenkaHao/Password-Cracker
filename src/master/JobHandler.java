@@ -31,6 +31,9 @@ class JobHandler extends ClientHandler
           GROUP_SIZE = Integer.parseInt(Received[1]);
           waitReConfig.release();
         } else if(Received[0].equals("n")) {
+          if(Integer.parseInt(Received[1])>Server.getWorkerList().size()){
+            return;
+          }
           if(WORKER_SIZE<Integer.parseInt(Received[1])) {
             waitReConfig.acquire();
             int increment = Integer.parseInt(Received[1])-WORKER_SIZE;
