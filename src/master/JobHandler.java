@@ -11,14 +11,14 @@ class JobHandler extends ClientHandler
     // private Semaphore available = new Semaphore(WORKER_SIZE, true);
     // private Semaphore wait = new Semaphore(1, true);
     // TODO:  remove entry in this list
-    private HashMap<Socket, LinkedList<Thread>> WorkerJobs = new HashMap<>();// !!!!!!! have to init when new worker join
+    // private HashMap<Socket, LinkedList<Thread>> WorkerJobs = new HashMap<>();// !!!!!!! have to init when new worker join
     private String[] Job;
-    private int NextHost = 0;
+    private int NextHost;
     private String nextHead = "AAAAA";
     // private int
     private String result = "";
     // TODO:  remove entry in this list
-    private ConcurrentLinkedQueue<Thread> WorkingPartList = new ConcurrentLinkedQueue<>();
+    private ConcurrentLinkedQueue<Integer> IdleList = new ConcurrentLinkedQueue<>();
     // public Map<String, Boolean> partitions;// start, working
     private Semaphore wait = new Semaphore(1, true);
 
@@ -35,10 +35,11 @@ class JobHandler extends ClientHandler
         } else if(Received[0].equals("n")) {
           if(WORKER_SIZE<Integer.parseInt(Received[1])) {
             int increment = Integer.parseInt(Received[1])-WORKER_SIZE;
+            for(int i = WORKER_SIZE; i < Integer.parseInt(Received[1]); i++){
+              IdleList.add(i);
+            }
             available.release(increment);
             waitReConfig.acquire();
-            NextHost = Integer.parseInt(Received[1])-1;
-            System.out.println("NextHost:                         "+NextHost);
             WORKER_SIZE = Integer.parseInt(Received[1]);
             // PrintWriter PCdos = new PrintWriter(Cdos, true);
             // PCdos.write("OK");
@@ -47,26 +48,15 @@ class JobHandler extends ClientHandler
           } else if(WORKER_SIZE>Integer.parseInt(Received[1])){
             int decrement = WORKER_SIZE-Integer.parseInt(Received[1]);
             int count = 0;
-            ArrayList<Socket> removeList = new ArrayList<>(decrement);
+            // ArrayList<Socket> removeList = new ArrayList<>(decrement);
             waitReConfig.acquire();
-            for (Socket key : WorkerJobs.keySet()) {
-                removeList.add(key);
-                count = count + 1;
-                if (count==decrement){
-                  break;
-                }
+            available.release(decrement);
+            for(int i = WORKER_SIZE-1 ; i > Integer.parseInt(Received[1])-1; i--){
+              IdleList.remove(i);
+              PrintWriter PWdos = new PrintWriter(Server.getWorkerList().get(i).GetWdos(), true);
+              PWdos.write("QUIT\n");
+              PWdos.flush();
             }
-            for(Socket Ws: removeList){
-              for(Thread t: WorkerJobs.get(Ws)){
-                t.interrupt();
-              }
-              // wait.acquire();
-              // WorkerJobs.put(Ws);
-              WorkerJobs.put(Ws, new LinkedList<Thread>());
-              // wait.release();
-            }
-            NextHost = Integer.parseInt(Received[1])-1;
-            System.out.println("NextHost:                         "+NextHost);
             WORKER_SIZE = Integer.parseInt(Received[1]);
             // PrintWriter PCdos = new PrintWriter(Cdos, true);
             // PCdos.write("OK");
@@ -104,9 +94,9 @@ class JobHandler extends ClientHandler
     public JobHandler(Socket Cs, InputStream Cdis, OutputStream Cdos)
     {
         super(Cs, Cdis, Cdos);
-        for(WorkerInfo WI: Server.getWorkerList()){
-          WorkerJobs.put(WI.GetWs(), new LinkedList<Thread>());
-        }
+        // for(WorkerInfo WI: Server.getWorkerList()){
+        //   WorkerJobs.put(WI.GetWs(), new LinkedList<Thread>());
+        // }
     }
 
     @Override
@@ -129,6 +119,9 @@ class JobHandler extends ClientHandler
       // number of worker
       int increment = Integer.parseInt(Job[2]);
       available.release(increment);
+      for(int i = 0; i < increment; i++){
+        IdleList.add(i);
+      }
       System.out.println("available node size:                                "+available.availablePermits());
       WORKER_SIZE = Integer.parseInt(Job[2]);
       System.out.println("WORKER_SIZE:                                        "+WORKER_SIZE);
@@ -149,15 +142,17 @@ class JobHandler extends ClientHandler
             while(!nextHead.equals("-1")) {
               waitReConfig.acquire();
               available.acquire();
+              NextHost = IdleList.poll();
               if(!result.equals("")) {
                 PrintWriter PCdos = new PrintWriter(Cdos, true);
                 PCdos.write(result);
                 PCdos.flush();
-                for(Thread t: WorkingPartList)
-                {
-                  t.interrupt();
+                for(int i = 0 ; i <= WORKER_SIZE-1; i++){
+                  PrintWriter PWdos = new PrintWriter(Server.getWorkerList().get(i).GetWdos(), true);
+                  PWdos.write("QUIT\n");
+                  PWdos.flush();
                 }
-                break;
+                return;
               }
               InputStream Win = Server.getWorkerList().get(NextHost).GetWdis();
               OutputStream Wout = Server.getWorkerList().get(NextHost).GetWdos();
@@ -166,9 +161,6 @@ class JobHandler extends ClientHandler
                   @Override
                   public void run() {
                     try{
-                      if(Thread.currentThread().interrupted()){
-                        throw new InterruptedException("InterruptedException!!!!!");
-                      }
                       String line = Job[1]+" "+nextHead+" "+GROUP_SIZE+"\n";     // MD5/nextHead/GROUP_SIZE
                       PrintWriter PWout = new PrintWriter(Wout, true);
                       PWout.write(line);
@@ -176,43 +168,32 @@ class JobHandler extends ClientHandler
                       System.out.println("req to worker:                        "+line);
                       BufferedReader BWin = new BufferedReader(new InputStreamReader(Win));
                       line = BWin.readLine();
-                      if(line.equals("11111")) {
+                      if(line.equals("11111")) { // to next
                         System.out.println("rep from worker:                    "+line);
-                      } else if(line.equals("00000")){
+                      } else if(line.equals("00000")){  // failed
                         System.out.println("rep from worker:                    "+line);
                         reSubmittedParts.add(Job[1]+" "+nextHead+" "+GROUP_SIZE+"\n");
                         System.out.println("reSubmittedParts:                   "+reSubmittedParts.peek());
-                      } else {
+                      } else {  // done!
                         result = line;
                         System.out.println("                                    done");
                       }
-                    } catch(InterruptedException | IOException e) { // only when blocked!!!!!!!!!!!!!!
+                    } catch( IOException e) { // only when blocked!!!!!!!!!!!!!!
                         // System.exit(-1);
                         reSubmittedParts.add(Job[1]+" "+nextHead+" "+GROUP_SIZE+"\n");
                         System.out.println("reSubmittedParts:                   "+reSubmittedParts.peek());
-                        // wait.release();
-                        // try {
-                          PrintWriter PWout = new PrintWriter(Wout, true);
-                          PWout.write("QUIT\n");
-                          PWout.flush();
-                        // } catch (IOException ex) {
-                        //     ex.printStackTrace();
-                        // }
+                        PrintWriter PWout = new PrintWriter(Wout, true);
+                        PWout.write("QUIT\n");
+                        PWout.flush();
                         System.out.println("I was killed!");
 
                     }
+                    IdleList.add(NextHost);
                     available.release();
-                    WorkingPartList.remove(Thread.currentThread());
                     System.out.println("available node size:                 "+available.availablePermits());
                   }
               };
               PartHandler.start();
-              WorkingPartList.add(PartHandler);
-              // wait.acquire();
-              WorkerJobs.get(Ws).add(PartHandler);
-              // wait.release();
-              // WorkerJobs.put(Ws, );
-              NextHost = (NextHost+1)%WORKER_SIZE;
               System.out.println("NextHost:                         "+NextHost);
               nextHead = NextParition.getNextParition(nextHead, GROUP_SIZE);
               System.out.println("nextHead:                   "+nextHead);
@@ -222,13 +203,15 @@ class JobHandler extends ClientHandler
             while(reSubmittedParts.size()!=0) {
               waitReConfig.acquire();
               available.acquire();
+              NextHost = IdleList.poll();
               if(!result.equals("")) {
                 PrintWriter PCdos = new PrintWriter(Cdos, true);
                 PCdos.write(result);
                 PCdos.flush();
-                for(Thread t: WorkingPartList)
-                {
-                  t.interrupt();
+                for(int i = 0 ; i <= WORKER_SIZE-1; i++){
+                  PrintWriter PWdos = new PrintWriter(Server.getWorkerList().get(i).GetWdos(), true);
+                  PWdos.write("QUIT\n");
+                  PWdos.flush();
                 }
                 break;
               }
@@ -243,9 +226,9 @@ class JobHandler extends ClientHandler
                   @Override
                   public void run() {
                     try{
-                      if(Thread.currentThread().interrupted()){
-                        throw new InterruptedException("InterruptedException!!!!!");
-                      }
+                      // if(Thread.currentThread().interrupted()){
+                      //   throw new InterruptedException("InterruptedException!!!!!");
+                      // }
                       String line = reSubmittedParts.poll();
                       PrintWriter PWout = new PrintWriter(Wout, true);
                       PWout.write(line);
@@ -262,30 +245,24 @@ class JobHandler extends ClientHandler
                       } else {
                         result = line;
                       }
-                    } catch(InterruptedException | IOException e) {
-                        // System.exit(-1);
+                    } catch(IOException e) {
                         reSubmittedParts.add(Job[1]+" "+nextHead+" "+GROUP_SIZE+"\n");
-                        // wait.release();
-                        // try {
-                          PrintWriter PWout = new PrintWriter(Wout, true);
-                          PWout.write("QUIT\n");
-                          PWout.flush();
-                        // } catch (IOException ex) {
-                        //     ex.printStackTrace();
-                        // }
+                        PrintWriter PWout = new PrintWriter(Wout, true);
+                        PWout.write("QUIT\n");
+                        PWout.flush();
                         System.out.println("I was killed!");
-
                     }
+                    IdleList.add(NextHost);
                     available.release();
-                    WorkingPartList.remove(Thread.currentThread());
+                    // IdleList.remove(Thread.currentThread());
                   }
               };
               PartHandler.start();
-              WorkingPartList.add(PartHandler);
+              // IdleList.add(PartHandler);
               // wait.acquire();
-              WorkerJobs.get(Ws).add(PartHandler);
+              // WorkerJobs.get(Ws).add(PartHandler);
               // wait.acquire();
-              NextHost = (NextHost+1)%WORKER_SIZE;
+              // NextHost = IdleList.poll();
               System.out.println("NextHost:                         "+NextHost);
 
               waitReConfig.release();
