@@ -141,7 +141,7 @@ void crack(int sockfd, Task *task, Worker *worker) {
   }
   // Not found
   std::cout << "Worker: PWD NOT FOUND! ";
-  sendAll(sockfd, std::string("11111\n"), 6);
+  sendAll(sockfd, std::string("1\n"), 2);
   mtx.lock();
   worker->setState(IDLE);
   mtx.unlock();
