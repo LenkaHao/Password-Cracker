@@ -92,12 +92,16 @@ app.post('/getProgess', function(req, res) {
           'Password'              : data.toString()
       };
       res.send(formData);
+      session_value = req.session.value;
+      req.session.destroy();
+      UserDB.delete(session_value);
     	client.destroy(); // kill client after server's response
       console.log("Cs closed");
     });
 
     client.on('close', function() {
     	console.log('Connection closed');
+
     });
   } else {
     console.log("haven't login");
