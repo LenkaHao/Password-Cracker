@@ -142,10 +142,6 @@ class JobHandler extends ClientHandler
             while(!nextHead.equals("-1")) {
               waitReConfig.acquire();
               available.acquire();
-              NextHost = IdleList.poll();
-              System.out.println("1NextHost :                 "+NextHost);
-              // System.out.println("IdleList.size():              "+IdleList.size());
-              // System.out.println("available.availablePermits(): "+available.availablePermits());
               if(!result.equals("")) {
                 PrintWriter PCdos = new PrintWriter(Cdos, true);
                 PCdos.write(result);
@@ -157,6 +153,12 @@ class JobHandler extends ClientHandler
                 }
                 return;
               }
+              
+              NextHost = IdleList.poll();
+              System.out.println("1NextHost :                 "+NextHost);
+              // System.out.println("IdleList.size():              "+IdleList.size());
+              // System.out.println("available.availablePermits(): "+available.availablePermits());
+
               InputStream Win = Server.getWorkerList().get(NextHost).GetWdis();
               OutputStream Wout = Server.getWorkerList().get(NextHost).GetWdos();
               Socket Ws = Server.getWorkerList().get(NextHost).GetWs();
