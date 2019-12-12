@@ -53,8 +53,6 @@ int receiveAll(int sockfd, std::string &msg) {
     std::string tmp(buff);
     msg.append(tmp);
   }
-  msg.pop_back();
-  msg.append("\\n");
   std::cout << "Worker: received message: " << msg << std::endl;
   return 0;
 }
