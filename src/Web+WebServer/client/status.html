@@ -203,11 +203,11 @@
             return false;
           }
           if(parseInt($('input[name=Size_of_Partition]').val()) < $('input[name=Size_of_Partition]').attr('min')){
-              alert("invalid input! \nexpected range [1,4294967295]");
+              alert("invalid input! \nexpected range [1,2000000000]");
               return false;
           }
           else if(parseInt($('input[name=Size_of_Partition]').val()) > $('input[name=Size_of_Partition]').attr('max')){
-              alert("invalid input! \nexpected range [1,4294967295]");
+              alert("invalid input! \nexpected range [1,2000000000]");
               return false;
           }
           else return true;
