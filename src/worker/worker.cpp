@@ -204,6 +204,8 @@ int main(int argc, char *argv[]) {
         worker.setState(TERMINATE);
         mtx.unlock();
         // signal master to reassign the task
+        std::string exp_msg = "EXIT";
+        exp_msg.append(ENDMSG);
         while (true) {
           std::this_thread::sleep_for(std::chrono::milliseconds(10));
           mtx.lock();
@@ -213,10 +215,8 @@ int main(int argc, char *argv[]) {
           }
           mtx.unlock();
         }
+        sendAll(worker.getSocketFd(), exp_msg, exp_msg.length());
       }
-      std::string exp_msg = "EXIT";
-      exp_msg.append(ENDMSG);
-      sendAll(worker.getSocketFd(), exp_msg, exp_msg.length());
       continue;
     }
     // handling crack task
