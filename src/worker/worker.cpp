@@ -53,6 +53,8 @@ int receiveAll(int sockfd, std::string &msg) {
     std::string tmp(buff);
     msg.append(tmp);
   }
+  msg.pop_back();
+  msg.append("\\n");
   std::cout << "Worker: received message: " << msg << std::endl;
   return 0;
 }
@@ -207,7 +209,7 @@ int main(int argc, char *argv[]) {
         std::string exp_msg = "EXIT";
         exp_msg.append(ENDMSG);
         while (true) {
-          std::this_thread::sleep_for(std::chrono::milliseconds(50));
+          std::this_thread::sleep_for(std::chrono::milliseconds(10));
           mtx.lock();
           if (worker.getState() == IDLE) {
             mtx.unlock();
