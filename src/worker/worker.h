@@ -28,7 +28,7 @@ enum Status{INIT, IDLE, CRACK, TERMINATE};
 struct Task {
   std::string pwd_md5;
   std::string start_pwd;
-  uint16_t range = 0;
+  uint32_t range = 0;   // partition size: 0 - 4,294,967,295
 };
 
 class Worker {

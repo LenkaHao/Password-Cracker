@@ -2,3 +2,4 @@
 *.txt
 *.out
 cmake-build-debug
+test_server/

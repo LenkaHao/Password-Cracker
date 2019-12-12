@@ -113,7 +113,7 @@ std::string nextPermutation(const std::string &pwd) {
 void crack(int sockfd, Task *task, Worker *worker) {
   std::string end_str = "zzzzz";
   std::string pwd_str = task->start_pwd;
-  int count = 0;
+  uint32_t count = 0;
   while (pwd_str != end_str && count < task->range) {
     mtx.lock();
     Status state = worker->getState();
