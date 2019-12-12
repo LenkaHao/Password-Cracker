@@ -15,39 +15,47 @@
   </head>
   <body>
      <div class="container">
-        <div class="row">
-            <p><br /></p>
+        <div class="row text-center">
+            <a herf="https://github.com/LenkaHao/Password-Cracker"><h1>Distributed Password Cracker</h1></a>
+            <p>Author: Zongshun Zhang, Guanting Chen, Jiatong Hao</p>
         </div>
         <div class="row">
             <div class="col-md-4"></div>
             <div class="col-md-4">
-                <div class="panel panel-default">
-                    <form name="ReqForm">
-                        <p></p>
-                        <table class="table table-bordered table-hover">
+                <div class="panel panel-default" style="margin-bottom:0px">
+                    <form name="ReqForm" style="margin-bottom: 0px;">
+                        <table class="table table-bordered table-hover" style="margin-bottom:0px;">
                             <tbody>
                                 <tr>
-                                    <td class="col-md-6">Hashed MD5</td>
+                                    <td class="col-md-6" style="vertical-align: middle;">
+                                      <center>Hashed MD5</center>
+                                    </td>
                                     <td class="col-md-6">
-                                        <div class="form-group">
+                                        <div class="form-group" style="margin-bottom: 0px;">
                                             <input type="text" class="form-control" name="Hashed_MD5" required pattern=".{32,32}">
                                         </div>
+                                        <div style="font-style:italic;font-size:8px">*lowercase letters</div>
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td class="col-md-6">Number of Node <br/>[1, 5]</td>
+                                    <td class="col-md-6" style="vertical-align: middle;">
+                                      <center>Number of workers</center>
+                                    </td>
                                     <td class="col-md-6">
-                                        <div class="form-group">
+                                        <div class="form-group" style="margin-bottom: 0px;">
                                             <input type="number" class="form-control" name="Number_of_Node" required onchange="reConfigNumberOfNode()" min="1" max="5">
                                         </div>
+                                        <div style="font-style:italic;font-size:8px">*range: [1, 5]</div>
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td class="col-md-6">Size of Partition<br/>[1, 4294967295]</td>
-                                    <td class="col-md-6">
-                                        <div class="form-group">
+                                    <td class="col-md-6" style="vertical-align: middle;">
+                                      <center>Partition size</center>
+                                    </td>
+                                        <div class="form-group" style="margin-bottom: 0px;">
                                             <input type="number" class="form-control" name="Size_of_Partition" required onchange="reConfigPartitionSize()" min="1" max="4294967295">
                                         </div>
+                                        <div style="font-style:italic;font-size:8px">*range: [1, 4294967295]</div>
                                     </td>
                                 </tr>
                                 <tr>
@@ -60,6 +68,7 @@
                         </table>
                     </form>
                 </div>
+                <p class="text-justify" style="font-style: italic">*Note: after submit, you are able to chagne the number of cracking node and partitioning size on the fly.</p>
             </div>
             <div class="col-md-4"></div>
         </div>
@@ -69,7 +78,7 @@
               <thead>
                   <tr>
                       <th scope="col">Hashed MD5</th>
-                      <th scope="col">Number of Tried Combination</th>
+                      <th scope="col">Password</th>
                       <th scope="col">Turn Around Time(ms)</th>
                   </tr>
                   <tr id="Entries">
@@ -78,7 +87,6 @@
               <tbody></tbody>
           </table>
       </div>
-      <i>NOTE: after submit, changing (change value and click somewhere else, let the change event be catch) 2nd and 3rd cell can then take effect</i>
     <script>
     $(document).ready(function() {
         // event.preventDefault();
