@@ -116,7 +116,7 @@ static unsigned* MD5Hash(std::string msg)
       h[p] += abcd[p];
     os += 64;
   }
-
+  free(msg2);   // avoid memory leak
   return h;
 }
 
