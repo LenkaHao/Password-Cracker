@@ -83,7 +83,8 @@ class JobHandler extends ClientHandler
             received = BCdis.readLine();
             System.out.println("job got from client:                              "+received);
           } catch (IOException e) {
-              e.printStackTrace();
+              // e.printStackTrace();
+              System.out.println("Client Connection was down");
           }
             try {
                 Dispatch(received);
@@ -179,7 +180,7 @@ class JobHandler extends ClientHandler
                       PrintWriter PWout = new PrintWriter(Wout, true);
                       PWout.write(line);
                       PWout.flush();
-                      // System.out.println("req to worker:                        "+line);
+                      System.out.println("req to worker:                        "+line);
                       BufferedReader BWin = new BufferedReader(new InputStreamReader(Win));
                       line = BWin.readLine();
                       System.out.println("data received: " + line);
