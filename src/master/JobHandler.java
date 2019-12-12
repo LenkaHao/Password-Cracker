@@ -153,7 +153,7 @@ class JobHandler extends ClientHandler
                 }
                 return;
               }
-              
+
               NextHost = IdleList.poll();
               System.out.println("1NextHost :                 "+NextHost);
               // System.out.println("IdleList.size():              "+IdleList.size());
@@ -200,6 +200,7 @@ class JobHandler extends ClientHandler
                     if(!quitted) {
                       IdleList.add(thisHost);
                       System.out.println("thisHost :                 "+thisHost);
+                      System.out.println("Job[1]:                    "+Job[1])
                       System.out.println("2 "+Arrays.toString(IdleList.toArray()));
                       // System.out.println("2 IdleList");
                     }
