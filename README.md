@@ -18,8 +18,6 @@ Otherwise, start with Section 1 to set up servers on GENI.
    \$ chmod +x webserver.sh
    
    \$ ./webserver.sh
-   
-   \$ node index.js
 
 3. Set up the master
 
@@ -30,8 +28,6 @@ Otherwise, start with Section 1 to set up servers on GENI.
    \$ chmod +x master.sh
    
    \$ ./master.sh
-   
-   \$ java Server
 
 4. Set up workers
 
@@ -44,11 +40,17 @@ Otherwise, start with Section 1 to set up servers on GENI.
    \$ chmod +x worker.sh
    
    \$ ./worker.sh
-   
-   \$ ./worker.out
 
    
 ### Section 2: Use the web interface to interact
+
+1.  Run the following commands in order to start the system
+
+    For Webserver: \$ node index.js
+    
+    For Master: \$ java Server
+    
+    For workers: \$ ./worker.out
 
 1.  In a web browser, go to "webserver_ip:9007", where webserver_ip can be found on GENI.
 
