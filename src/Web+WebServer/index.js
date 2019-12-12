@@ -1,4 +1,4 @@
-// YOU CAN USE THIS FILE AS REFERENCE FOR SERVER DEVELOPMENT
+var os = require("os");
 // include the express module
 var express = require("express");
 // create an express application
@@ -48,8 +48,14 @@ app.use(session({
 ));
 
 // server listens on port 9007 for incoming connections
-app.listen(9007, () => console.log('Listening on port 9007!'));
+app.listen(9007, () => {
+  console.log("=======================");
+  console.log(require('os').hostname());
+  console.log('Listening on port 9007');
+  console.log("=======================");});
 
+
+var hostname = os.hostname();
 // GET method route for the addEvents page.
 // It serves addSchedule.html present in client folder
 // app.get('/',function(req, res) {

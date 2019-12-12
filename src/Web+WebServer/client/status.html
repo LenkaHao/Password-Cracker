@@ -35,7 +35,7 @@
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td class="col-md-6">Number of Node</td>
+                                    <td class="col-md-6">Number of Node <br/>[1, 5]</td>
                                     <td class="col-md-6">
                                         <div class="form-group">
                                             <input type="number" class="form-control" name="Number_of_Node" required onchange="reConfigNumberOfNode()" min="1" max="5">
@@ -43,10 +43,10 @@
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td class="col-md-6">Size of Partition</td>
+                                    <td class="col-md-6">Size of Partition<br/>[1, 4294967295]</td>
                                     <td class="col-md-6">
                                         <div class="form-group">
-                                            <input type="number" class="form-control" name="Size_of_Partition" required onchange="reConfigPartitionSize()">
+                                            <input type="number" class="form-control" name="Size_of_Partition" required onchange="reConfigPartitionSize()" min="1" max="4294967295">
                                         </div>
                                     </td>
                                 </tr>
@@ -132,7 +132,6 @@
       function reConfigNumberOfNode(){
         // var targetHost = $('input[name=Target_Host]').val();
         if(!NumberOfNodeCheck()){
-          alert("invalid input! \nexpected range [1,5]");
           return;
         }
         var formData = {
@@ -155,6 +154,9 @@
       }
       function reConfigPartitionSize(){
         // var targetHost = $('input[name=Target_Host]').val();
+        if(!PartitionSizeCheck()){
+          return;
+        }
         var formData = {
             'Size_of_Partition'              : $('input[name=Size_of_Partition]').val()
         };
@@ -171,10 +173,34 @@
       }
       function NumberOfNodeCheck()
       {
-          if(parseInt($('input[name=Number_of_Node]').val()) < $('input[name=Number_of_Node]').attr('min'))
+          if(!Number.isInteger($('input[name=Number_of_Node]').val())){
+            alert("invalid input! \nexpected Integer");
+            return false;
+          }
+          if(parseInt($('input[name=Number_of_Node]').val()) < $('input[name=Number_of_Node]').attr('min')){
+              alert("invalid input! \nexpected range [1,5]");
               return false;
-          else if(parseInt($('input[name=Number_of_Node]').val()) > $('input[name=Number_of_Node]').attr('max'))
+          }
+          else if(parseInt($('input[name=Number_of_Node]').val()) > $('input[name=Number_of_Node]').attr('max')){
+              alert("invalid input! \nexpected range [1,5]");
               return false;
+          }
+          else return true;
+      }
+      function PartitionSizeCheck()
+      {
+          if(!Number.isInteger($('input[name=Size_of_Partition]').val())){
+            alert("invalid input! \nexpected Integer");
+            return false;
+          }
+          if(parseInt($('input[name=Size_of_Partition]').val()) < $('input[name=Size_of_Partition]').attr('min')){
+              alert("invalid input! \nexpected range [1,4294967295]");
+              return false;
+          }
+          else if(parseInt($('input[name=Size_of_Partition]').val()) > $('input[name=Size_of_Partition]').attr('max')){
+              alert("invalid input! \nexpected range [1,4294967295]");
+              return false;
+          }
           else return true;
       }
     </script>
