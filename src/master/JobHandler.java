@@ -21,7 +21,7 @@ class JobHandler extends ClientHandler
     private ConcurrentLinkedQueue<Integer> IdleList = new ConcurrentLinkedQueue<>();
     private Boolean keeplistening = true;
     // public Map<String, Boolean> partitions;// start, working
-    // private Semaphore wait = new Semaphore(1, true);
+    private Semaphore ResultCheck = new Semaphore(1, true);
 
     private class Dispatcher extends Thread {
       public void Dispatch(String s) throws InterruptedException {
@@ -142,6 +142,7 @@ class JobHandler extends ClientHandler
             while(!nextHead.equals("-1")) {
               waitReConfig.acquire();
               available.acquire();
+              ResultCheck.acquire();
               if(!result.equals("")) {
                 PrintWriter PCdos = new PrintWriter(Cdos, true);
                 PCdos.write(result);
@@ -153,6 +154,7 @@ class JobHandler extends ClientHandler
                 }
                 return;
               }
+              ResultCheck.release();
               NextHost = IdleList.poll();
               while(NextHost>=WORKER_SIZE){
                 NextHost = IdleList.poll();
@@ -194,7 +196,9 @@ class JobHandler extends ClientHandler
                       } else if(line.equals("0")){
                         throw new Exception("my format was wrong!!!");
                       } else {  // done!
+                        ResultCheck.acquire();
                         result = line;
+                        ResultCheck.release();
                         // System.out.println("                                    done");
                       }
                     } catch( Exception e) { // only when blocked!!!!!!!!!!!!!!
@@ -228,6 +232,7 @@ class JobHandler extends ClientHandler
               System.out.println("2NextHost :                 "+NextHost);
               // System.out.println("IdleList.size():              "+IdleList.size());
               // System.out.println("available.availablePermits(): "+available.availablePermits());
+              ResultCheck.acquire();
               if(!result.equals("")) {
                 PrintWriter PCdos = new PrintWriter(Cdos, true);
                 PCdos.write(result);
@@ -239,6 +244,7 @@ class JobHandler extends ClientHandler
                 }
                 break;
               }
+              ResultCheck.release();
               InputStream Win = Server.getWorkerList().get(NextHost).GetWdis();
               OutputStream Wout = Server.getWorkerList().get(NextHost).GetWdos();
               Socket Ws = Server.getWorkerList().get(NextHost).GetWs();
@@ -268,7 +274,9 @@ class JobHandler extends ClientHandler
                       } else if(line.equals("0")){
                         throw new Exception("my format was wrong!!!");
                       } else {  // done!
+                        ResultCheck.acquire();
                         result = line;
+                        ResultCheck.release();
                         // System.out.println("                                    done");
                       }
                     } catch(Exception e) {
