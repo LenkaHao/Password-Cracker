@@ -173,7 +173,7 @@
       }
       function NumberOfNodeCheck()
       {
-          if(!$('input[name=Number_of_Node]').val() === parseInt($('input[name=Number_of_Node]').val(), 10))){
+          if(!$('input[name=Number_of_Node]').val() === parseInt($('input[name=Number_of_Node]').val(), 10)){
             alert("invalid input! \nexpected Integer");
             return false;
           }
@@ -189,7 +189,7 @@
       }
       function PartitionSizeCheck()
       {
-          if(!Number.isInteger($('input[name=Size_of_Partition]').val())){
+          if(!$('input[name=Size_of_Partition]').val() === parseInt($('input[name=Size_of_Partition]').val(), 10)){
             alert("invalid input! \nexpected Integer");
             return false;
           }
