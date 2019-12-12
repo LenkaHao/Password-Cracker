@@ -85,6 +85,7 @@ class JobHandler extends ClientHandler
           } catch (IOException e) {
               // e.printStackTrace();
               System.out.println("Client Connection was down");
+              return;
           }
             try {
                 Dispatch(received);
@@ -170,13 +171,14 @@ class JobHandler extends ClientHandler
               Socket Ws = Server.getWorkerList().get(NextHost).GetWs();
               Thread PartHandler = new Thread("UIHandler"){
                   private int thisHost = NextHost;
+                  private int thisHead = nextHead;
                   private boolean quitted = false;
                   @Override
                   public void run() {
 
                     try{
 
-                      String line = Job[1]+" "+nextHead+" "+GROUP_SIZE+"\n";     // MD5/nextHead/GROUP_SIZE
+                      String line = Job[1]+" "+thisHead+" "+GROUP_SIZE+"\n";     // MD5/nextHead/GROUP_SIZE
                       PrintWriter PWout = new PrintWriter(Wout, true);
                       PWout.write(line);
                       PWout.flush();
@@ -188,10 +190,10 @@ class JobHandler extends ClientHandler
                         // System.out.println("rep from worker:                    "+line);
                       } else if(line.equals("-1")){  // failed
                         // System.out.println("rep from worker:                    "+line);
-                        reSubmittedParts.add(Job[1]+" "+nextHead+" "+GROUP_SIZE+"\n");
+                        reSubmittedParts.add(Job[1]+" "+thisHead+" "+GROUP_SIZE+"\n");
                         System.out.println("reSubmittedParts:                   "+Arrays.toString(reSubmittedParts.toArray()));
                       } else if(line.equals("EXIT")){
-                        reSubmittedParts.add(Job[1]+" "+nextHead+" "+GROUP_SIZE+"\n");
+                        reSubmittedParts.add(Job[1]+" "+thisHead+" "+GROUP_SIZE+"\n");
                         System.out.println("reSubmittedParts:                   "+Arrays.toString(reSubmittedParts.toArray()));
                         quitted = true;
                       } else if(line.equals("0")){
