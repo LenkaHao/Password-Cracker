@@ -213,10 +213,10 @@ int main(int argc, char *argv[]) {
           }
           mtx.unlock();
         }
-        std::string exp_msg = "EXIT";
-        exp_msg.append(ENDMSG);
-        sendAll(worker.getSocketFd(), exp_msg, exp_msg.length());
       }
+      std::string exp_msg = "EXIT";
+      exp_msg.append(ENDMSG);
+      sendAll(worker.getSocketFd(), exp_msg, exp_msg.length());
       continue;
     }
     // handling crack task
