@@ -82,15 +82,20 @@ class JobHandler extends ClientHandler
             BufferedReader BCdis = new BufferedReader(new InputStreamReader(Cdis));
             received = BCdis.readLine();
             System.out.println("job got from client:                              "+received);
-          } catch (IOException e) {
-              // e.printStackTrace();
+            if(received==null){
               System.out.println("Client Connection was down");
+              return;
+            }
+          } catch (IOException e) {
+              e.printStackTrace();
+
               return;
           }
             try {
                 Dispatch(received);
             } catch (InterruptedException e) {
                 e.printStackTrace();
+                return;
             }
         }
       }
