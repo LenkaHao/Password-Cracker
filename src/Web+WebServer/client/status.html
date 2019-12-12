@@ -173,7 +173,7 @@
       }
       function NumberOfNodeCheck()
       {
-          if(!Number.isInteger($('input[name=Number_of_Node]').val())){
+          if(!$('input[name=Number_of_Node]').val() === parseInt($('input[name=Number_of_Node]').val(), 10))){
             alert("invalid input! \nexpected Integer");
             return false;
           }
