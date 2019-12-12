@@ -65,6 +65,10 @@ app.get('/', function(req, res) {
   // t.set("nodecount", 5);
   UserDB.set(req.session.value, new Map());
   client = new net.Socket();
+  client.connect(8000, 'master', function() {
+    console.log('Connected');
+    // client.write("r/"+req.body.Hashed_MD5+"/"+req.body.Number_of_Node+"/"+req.body.Size_of_Partition+"\n");
+  });
   UserDB.set(req.session.value, UserDB.get(req.session.value).set("Cs", client));
   // UserDB.set(req.session.value, UserDB.get(req.session.value).set("partitionsize", req.body.Size_of_Partition));
   // UserDB.set(req.session.value, UserDB.get(req.session.value).set("nodecount", req.body.Number_of_Node));
@@ -80,10 +84,10 @@ app.post('/getProgess', function(req, res) {
     client = UserDB.get(req.session.value).get("Cs");
     // client = new net.Socket();
     // client.setKeepAlive(true, 60000);
-    client.connect(8000, 'master', function() {
-    	console.log('Connected');
-    	client.write("r/"+req.body.Hashed_MD5+"/"+req.body.Number_of_Node+"/"+req.body.Size_of_Partition+"\n");
-    });
+    // client.connect(8000, 'master', function() {
+    	// console.log('Connected');
+    client.write("r/"+req.body.Hashed_MD5+"/"+req.body.Number_of_Node+"/"+req.body.Size_of_Partition+"\n");
+    // });
     // UserDB.set(req.session.value, UserDB.get(req.session.value).set("Cs", client));
     UserDB.set(req.session.value, UserDB.get(req.session.value).set("partitionsize", req.body.Size_of_Partition));
     UserDB.set(req.session.value, UserDB.get(req.session.value).set("nodecount", req.body.Number_of_Node));
