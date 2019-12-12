@@ -54,8 +54,16 @@ Otherwise, start with Section 1 to set up servers on GENI.
 
     For our resource, go to http://72.36.65.84:9007/
     
-    Enter md5 hash, number of workers (1-5) and size of a partition (e.g. 1000)
+2.  Enter md5 hash, number of workers (1-5) and size of a partition (e.g. 1000)
    
     Wait until the result comes back. 
    
     To change the number of workers on the fly, enter a number for workers. Do no click "Submit". The web interface will dynamically detect the change.
+    
+ **Important assumptions**
+ 
+ Max number of clients (web interface) at the same time: 1
+ 
+ Max number of worker nodes: 5
+ 
+ Input md5 hash for a 5-character password (a-z, A-Z) must be valid. We use this website for generating md5 hash: https://www.md5hashgenerator.com
