@@ -76,7 +76,7 @@ app.post('/getProgess', function(req, res) {
   if (req.session.value) {
     console.log(req.body.Hashed_MD5);
     client = new net.Socket();
-    client.setKeepAlive(true, 60000);
+    // client.setKeepAlive(true, 60000);
     client.connect(8000, 'master', function() {
     	console.log('Connected');
     	client.write("r/"+req.body.Hashed_MD5+"/"+req.body.Number_of_Node+"/"+req.body.Size_of_Partition+"\n");
@@ -92,13 +92,13 @@ app.post('/getProgess', function(req, res) {
           'Password'              : data.toString()
       };
       res.send(formData);
-    	// client.destroy(); // kill client after server's response
-      // console.log("Cs closed");
+    	client.destroy(); // kill client after server's response
+      console.log("Cs closed");
     });
 
-    // client.on('close', function() {
-    // 	console.log('Connection closed');
-    // });
+    client.on('close', function() {
+    	console.log('Connection closed');
+    });
   } else {
     console.log("haven't login");
     res.redirect('/');
