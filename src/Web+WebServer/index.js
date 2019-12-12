@@ -64,12 +64,6 @@ app.get('/', function(req, res) {
   // t.set("partitionsize", 1000);
   // t.set("nodecount", 5);
   UserDB.set(req.session.value, new Map());
-  client = new net.Socket();
-  client.connect(8000, 'master', function() {
-    console.log('Connected');
-    // client.write("r/"+req.body.Hashed_MD5+"/"+req.body.Number_of_Node+"/"+req.body.Size_of_Partition+"\n");
-  });
-  UserDB.set(req.session.value, UserDB.get(req.session.value).set("Cs", client));
   // UserDB.set(req.session.value, UserDB.get(req.session.value).set("partitionsize", req.body.Size_of_Partition));
   // UserDB.set(req.session.value, UserDB.get(req.session.value).set("nodecount", req.body.Number_of_Node));
   UserID = UserID+1;
@@ -81,14 +75,13 @@ app.get('/', function(req, res) {
 app.post('/getProgess', function(req, res) {
   if (req.session.value) {
     console.log(req.body.Hashed_MD5);
-    client = UserDB.get(req.session.value).get("Cs");
-    // client = new net.Socket();
+    client = new net.Socket();
     // client.setKeepAlive(true, 60000);
-    // client.connect(8000, 'master', function() {
-    	// console.log('Connected');
-    client.write("r/"+req.body.Hashed_MD5+"/"+req.body.Number_of_Node+"/"+req.body.Size_of_Partition+"\n");
-    // });
-    // UserDB.set(req.session.value, UserDB.get(req.session.value).set("Cs", client));
+    client.connect(8000, 'master', function() {
+    	console.log('Connected');
+    	client.write("r/"+req.body.Hashed_MD5+"/"+req.body.Number_of_Node+"/"+req.body.Size_of_Partition+"\n");
+    });
+    UserDB.set(req.session.value, UserDB.get(req.session.value).set("Cs", client));
     UserDB.set(req.session.value, UserDB.get(req.session.value).set("partitionsize", req.body.Size_of_Partition));
     UserDB.set(req.session.value, UserDB.get(req.session.value).set("nodecount", req.body.Number_of_Node));
 
@@ -124,7 +117,7 @@ app.post('/reConfigPartitionSize', function(req, res) {
   if (req.session.value) {
     // console.log(req.body.Hashed_MD5);
     client = UserDB.get(req.session.value).get("Cs");
-    // if(client){
+    if(client){
       // client.connect(1337, 'localhost', function() {
       	// console.log('Connected');
       	client.write("p/"+req.body.Size_of_Partition+"\n");
@@ -145,12 +138,12 @@ app.post('/reConfigPartitionSize', function(req, res) {
       //   res.send(formData);
       // 	// client.destroy(); // kill client after server's response
       // });
-    // } else {
+    } else {
         // var formData = {
         //     'result'              : "t"
         // };
         // res.send(formData);
-    // }
+    }
     res.end("done");
     // client.on('close', function() {
     // 	console.log('Connection closed');
@@ -167,7 +160,7 @@ app.post('/reConfigNumberOfNode', function(req, res) {
   if (req.session.value) {
     // console.log(req.body.Hashed_MD5);
     client = UserDB.get(req.session.value).get("Cs");
-    // if(client) {
+    if(client) {
       // client.connect(1337, 'localhost', function() {
       // 	console.log('Connected');
       console.log("n/"+req.body.Number_of_Node+"\n");
@@ -193,12 +186,12 @@ app.post('/reConfigNumberOfNode', function(req, res) {
       // client.on('close', function() {
       // 	console.log('Connection closed');
       // });
-    // } else {
+    } else {
       //   var formData = {
       //       'result'              : "t"
       //   };
       //   res.send(formData);
-    // }
+    }
     res.end("done");
   } else {
     console.log("new job");
