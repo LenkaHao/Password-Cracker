@@ -171,7 +171,7 @@ class JobHandler extends ClientHandler
               Socket Ws = Server.getWorkerList().get(NextHost).GetWs();
               Thread PartHandler = new Thread("UIHandler"){
                   private int thisHost = NextHost;
-                  private int thisHead = nextHead;
+                  private String thisHead = nextHead;
                   private boolean quitted = false;
                   @Override
                   public void run() {
