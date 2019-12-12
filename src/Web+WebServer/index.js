@@ -49,9 +49,11 @@ app.use(session({
 
 // server listens on port 9007 for incoming connections
 app.listen(9007, () => {
+  console.log("Start Web server successfully!");
   console.log("=======================");
-  console.log(require('os').hostname());
-  console.log('Listening on port 9007');
+  console.log("Listening port: 9007");
+  console.log("Access URL: " + require('os').hostname() + ":9007");
+  
   console.log("=======================");});
 
 
