@@ -153,8 +153,11 @@ class JobHandler extends ClientHandler
                 }
                 return;
               }
-
               NextHost = IdleList.poll();
+              while(NextHost>=WORKER_SIZE){
+                NextHost = IdleList.poll();
+              }
+
               System.out.println("1NextHost :                 "+NextHost);
               // System.out.println("IdleList.size():              "+IdleList.size());
               // System.out.println("available.availablePermits(): "+available.availablePermits());
@@ -197,13 +200,13 @@ class JobHandler extends ClientHandler
                     } catch( Exception e) { // only when blocked!!!!!!!!!!!!!!
                       e.printStackTrace();
                     }
-                    if(!quitted) {
+                    // if(!quitted) {
                       IdleList.add(thisHost);
                       System.out.println("thisHost :                 "+thisHost);
                       System.out.println("Job[1]:                    "+Job[1]);
                       System.out.println("2 "+Arrays.toString(IdleList.toArray()));
                       // System.out.println("2 IdleList");
-                    }
+                    // }
                     available.release();
                     // System.out.println("IdleList.size():              "+IdleList.size());
                     // System.out.println("available.availablePermits(): "+available.availablePermits());
@@ -219,6 +222,9 @@ class JobHandler extends ClientHandler
               waitReConfig.acquire();
               available.acquire();
               NextHost = IdleList.poll();
+              while(NextHost>=WORKER_SIZE){
+                NextHost = IdleList.poll();
+              }
               System.out.println("2NextHost :                 "+NextHost);
               // System.out.println("IdleList.size():              "+IdleList.size());
               // System.out.println("available.availablePermits(): "+available.availablePermits());
@@ -268,12 +274,12 @@ class JobHandler extends ClientHandler
                     } catch(Exception e) {
                         e.printStackTrace();
                     }
-                    if(!quitted) {
+                    // if(!quitted) {
                       IdleList.add(thisHost);
                       System.out.println("thisHost :                 "+thisHost);
                       System.out.println("2 "+Arrays.toString(IdleList.toArray()));
                       // System.out.println("2 IdleList");
-                    }
+                    // }
                     // System.out.println("3 IdleList");
                     available.release();
                     // System.out.println("IdleList.size():              "+IdleList.size());
