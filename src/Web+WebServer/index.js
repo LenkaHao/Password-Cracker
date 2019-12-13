@@ -53,7 +53,6 @@ app.listen(9007, () => {
   console.log("=======================");
   console.log("Listening port: 9007");
   console.log("Access URL: " + require('os').hostname() + ":9007");
-
   console.log("=======================");});
 
 
@@ -83,6 +82,15 @@ app.get('/', function(req, res) {
 app.post('/getProgess', function(req, res) {
   if (req.session.value) {
     console.log(req.body.Hashed_MD5);
+    client = UserDB.get(req.session.value).get("Cs");
+    if(client){
+      var formData = {
+          'Password'              : "dup req"
+      };
+      console.log("dup req!!!")
+      return;
+      // res.send(formData);
+    }
     client = new net.Socket();
     // client.setKeepAlive(true, 60000);
     client.connect(8000, 'master', function() {
