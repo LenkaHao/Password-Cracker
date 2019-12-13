@@ -53,7 +53,7 @@ app.listen(9007, () => {
   console.log("=======================");
   console.log("Listening port: 9007");
   console.log("Access URL: " + require('os').hostname() + ":9007");
-  
+
   console.log("=======================");});
 
 
@@ -99,7 +99,7 @@ app.post('/getProgess', function(req, res) {
       var formData = {
           'Password'              : data.toString()
       };
-      res.send(formData);
+      res.send(JSON.stringify(formData));
       // session_value = req.session.value;
       // req.session.destroy();
       // UserDB.delete(session_value);
