@@ -94,7 +94,7 @@ app.post('/getProgess', function(req, res) {
     UserDB.set(req.session.value, UserDB.get(req.session.value).set("working", true));
     client = new net.Socket();
     // client.setKeepAlive(true, 60000);
-    client.connect(8000, 'localhost', function() {
+    client.connect(8000, 'master', function() {
     	console.log('Connected');
     	client.write("r/"+req.body.Hashed_MD5+"/"+req.body.Number_of_Node+"/"+req.body.Size_of_Partition+"\n");
     });
