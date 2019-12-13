@@ -82,7 +82,7 @@ app.get('/', function(req, res) {
 app.post('/getProgess', function(req, res) {
   if (req.session.value) {
     console.log(req.body.Hashed_MD5);
-    client = UserDB.get(req.session.value).get("Cs");
+    client = UserDB.get(req.session.value).get("Working");
     if(client){
       var formData = {
           'Password'              : "dup req"
@@ -91,9 +91,10 @@ app.post('/getProgess', function(req, res) {
       return;
       // res.send(formData);
     }
+    UserDB.set(req.session.value, UserDB.get(req.session.value).set("working", true));
     client = new net.Socket();
     // client.setKeepAlive(true, 60000);
-    client.connect(8000, 'master', function() {
+    client.connect(8000, 'localhost', function() {
     	console.log('Connected');
     	client.write("r/"+req.body.Hashed_MD5+"/"+req.body.Number_of_Node+"/"+req.body.Size_of_Partition+"\n");
     });
@@ -114,7 +115,7 @@ app.post('/getProgess', function(req, res) {
     	// client.destroy(); // kill client after server's response
       // console.log("Cs closed");
     });
-
+    UserDB.set(req.session.value, UserDB.get(req.session.value).set("working", false));
     // client.on('close', function() {
     // 	console.log('Connection closed');
     //
